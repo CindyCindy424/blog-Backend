@@ -34,7 +34,7 @@ namespace Temperature
                // var xmlFile = "./Temperature.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 // 添加控制器层注释，true表示显示控制器注释
-                //var xmlPath = "./Temperature.xml";
+               // var xmlPath = "./Temperature.xml";
                 options.IncludeXmlComments(xmlPath, true);
             });
             #endregion

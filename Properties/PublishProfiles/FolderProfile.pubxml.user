@@ -4,9 +4,14 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_PublishTargetUrl>D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\发布-0904-cindy‘s-修改webconfig</_PublishTargetUrl>
+    <_PublishTargetUrl>D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\最终发布</_PublishTargetUrl>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
   </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=cdb-fmybdjyc.cd.tencentcdb.com%3bport:10118%3bDatabase=blog%3bUser ID=root%3bpassword=esgzhuanyeshixi2020%3bTrusted_Connection=True%3bMultipleActiveResultSets=true</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
   <ItemGroup>
     <EFMigrations Include="Temperature.Models.blogContext">
       <Value>
