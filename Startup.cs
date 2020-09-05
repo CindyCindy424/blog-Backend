@@ -19,6 +19,11 @@ namespace Temperature
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            //添加跨域服务
+            services.AddCors();
+
+
+
             // 添加Swagger
             //services.AddSwaggerGen(c =>
             //{
@@ -59,6 +64,18 @@ namespace Temperature
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // 设置允许所有来源跨域
+            app.UseCors(options =>
+            {
+                options.AllowAnyHeader();
+                options.AllowAnyMethod();
+                options.SetIsOriginAllowed(_ => true);
+                options.AllowCredentials();
+            });
+
+
+
 
             // 添加Swagger有关中间件
             app.UseSwagger();
