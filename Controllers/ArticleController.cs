@@ -7,11 +7,12 @@ using System.Reflection.Metadata.Ecma335;
 using Microsoft.EntityFrameworkCore;
 using Temperature.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
-
-
-  namespace Temperature.Controllers
+//20200907 订正后的articlecontroller
+namespace Temperature.Controllers
 {
+    [Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     //[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
@@ -21,15 +22,30 @@ using System.Diagnostics;
     {
         private blogContext entity = new blogContext(); //整体数据库类型
         /// <summary>
-        /// 创建文章
-        /// 名为nick_name用户创建一篇题目为title内容为content的文章
+        /// 创建文章名为nick_name用户创建一篇题目为title内容为content的文章
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="articleName"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///             ReturnFlag = flag,
+        ///             UserName = nick_name, 
+        ///             Article_Name = title, 
+        ///             result = result
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：该用户已存在同名文章
+        /// </remarks>
         [HttpPost]
         public JsonResult createArticleByNickName(string nick_name, string title,string content)
         {
+            var flag = 0;
             var userid =
                    (from c in entity.User
                     where c.NickName == nick_name
@@ -37,8 +53,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();  //在数据库中根据key找到相应记录
             if (id == default)
             {
-                Response.StatusCode = 410;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 410;//没找到该用户
+                flag = 2;//没有找到该用户
+                return Json(new { UserID = id,ReturnFlag= flag,result = "NOT FOUND" });
             }
 
             var checkArticle =
@@ -48,8 +65,9 @@ using System.Diagnostics;
             var check = checkArticle.FirstOrDefault();
             if (check != default)
             {
-                Response.StatusCode = 400;//该用户已存在同名文章
-                return Json(new { UserName = nick_name, Article_Name = title, result = "Already Exists!" });
+                // Response.StatusCode = 400;
+                flag = 3;//该用户已存在同名文章
+                return Json(new { ReturnFlag = flag,UserName = nick_name, Article_Name = title, result = "Already Exists!" });
             }
 
             var article = new Article();
@@ -63,8 +81,9 @@ using System.Diagnostics;
             entity.Article.Add(article);
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { user = nick_name, article = title });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, user = nick_name, article = title }) ;
         }
 
         /// <summary>
@@ -73,11 +92,28 @@ using System.Diagnostics;
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
-        /// <param name="articlecommentID"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// 
+        ///     返回内容：
+        ///     {
+        ///             ReturnFlag = flag,
+        ///             articleID = A_id,
+        ///             articlecomment = content
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        ///     
+        /// </remarks>
         [HttpPost]
         public JsonResult createArticleCommentByNickName(string nick_name, string title, string content)
         {
+            var flag = 0;
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -85,8 +121,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             var articleid =
@@ -96,8 +133,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文章
-                return Json(new { article = title, result = "Article NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3; //没找到该文章
+                return Json(new { ReturnFlag = flag, article = title, result = "Article NOT FOUND" });
             }
 
             //ARTICLE表更新评论
@@ -116,8 +154,9 @@ using System.Diagnostics;
             entity.ArticleCommentReply.Add(item);
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { articleID = A_id, articlecomment = content });
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, articleID = A_id, articlecomment = content });
         }
 
         /// <summary>
@@ -127,10 +166,24 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///             ReturnFlag = flag, 
+        ///             INFO = info
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticleInfoByTitle(string nick_name, string title)
         {
             //根据用户名找到用户ID
+            var flag = 0;
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -138,8 +191,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //根据用户ID和文章名找到对应文章
@@ -150,8 +204,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { ArticleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, ArticleID = A_id, result = "NOT FOUND" });
             }
 
             //修改Article表
@@ -169,8 +224,9 @@ using System.Diagnostics;
             entity.SaveChanges();
 
             var info = entity.Favourite.Find(A_id);
-            Response.StatusCode = 200;//成功
-            return Json(info);
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, INFO = info });
         }
 
         /// <summary>
@@ -180,9 +236,27 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// 
+        ///     返回内容：
+        ///     {
+        ///            eturnFlag = flag,
+        ///            UserName = nick_name,
+        ///            ArticleName = title,
+        ///            result = "success!"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        ///     
+        /// </remarks>
         [HttpPost]
         public JsonResult deleteArticleByTitle(string nick_name, string title)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -191,8 +265,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到对应文章
@@ -203,8 +278,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             //获得ArticleCommentReply表中记录
@@ -252,21 +328,38 @@ using System.Diagnostics;
             entity.Entry(info).State = EntityState.Deleted;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { UserName = nick_name, ArticleName = title, result = "success!" });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, UserName = nick_name, ArticleName = title, result = "success!" });
         }
 
 
         /// <summary>
-        /// 删除评论
-        /// 名为nick_name用户删除自己的id为articlecommentID的评论
+        /// 删除评论名为nick_name用户删除自己的id为articlecommentID的评论
+        /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <param name="articlecommentID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// 
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           result = "successful deleted"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该用户评论
+        ///     
+        /// </remarks>
         [HttpPost]
         public JsonResult deleteArticleCommentByID(string nick_name,int articlecommentID)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -275,8 +368,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到对应评论
@@ -287,8 +381,9 @@ using System.Diagnostics;
             var A_id = crid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { crID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章评论
+                flag = 3;
+                return Json(new { ReturnFlag = flag, crID = A_id, result = "NOT FOUND" });
             }
 
            // var article = entity.Article.Find(A_id);
@@ -309,8 +404,9 @@ using System.Diagnostics;
             entity.Entry(item).State = EntityState.Deleted;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { result = "successful deleted" });
+            // Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, result = "successful deleted" });
         }
 
         /// <summary>
@@ -320,9 +416,23 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           Item = item
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticleCommentByTitle(string nick_name, string title)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -331,8 +441,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到文章
@@ -343,8 +454,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             var item =
@@ -352,8 +464,9 @@ using System.Diagnostics;
                  where u.ArticleId == A_id
                  select u).Distinct();
 
-            Response.StatusCode = 200;//成功
-            return Json(item);
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, Item = item });
 
         }
 
@@ -364,9 +477,24 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag,
+        ///           result = "successful deleted"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        ///     4：没有找到浏览记录
+        /// </remarks>
         [HttpPost]
         public JsonResult DeleteArticleVisitByTitle(string nick_name, string title)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -375,8 +503,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到对应文章
@@ -387,8 +516,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             //找到对应浏览记录
@@ -399,8 +529,9 @@ using System.Diagnostics;
             var V_id = visitid.FirstOrDefault();
             if (V_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { VID = V_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 4;
+                return Json(new { ReturnFlag = flag, VID = V_id, result = "NOT FOUND" });
             }
 
             var item = entity.ArticleVisit.Find(id,A_id);
@@ -409,8 +540,9 @@ using System.Diagnostics;
             entity.Entry(item).State = EntityState.Deleted;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { result = "successful deleted" });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, result = "successful deleted" });
 
         }
 
@@ -421,9 +553,23 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           Item = item
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticleVisitByTitle(string nick_name, string title)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -432,8 +578,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到文章
@@ -444,8 +591,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             var item =
@@ -453,8 +601,9 @@ using System.Diagnostics;
                  where u.ArticleId == A_id
                  select u).Distinct();
 
-            Response.StatusCode = 200;//成功
-            return Json(item);
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, Item = item });
 
         }
 
@@ -466,9 +615,23 @@ using System.Diagnostics;
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
         /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           Itme = item
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticleRankByTitle(string nick_name, string title)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -477,8 +640,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到文章
@@ -489,8 +653,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             var item =
@@ -498,8 +663,9 @@ using System.Diagnostics;
                  where u.ArticleId == A_id
                  select u).Distinct();
 
-            Response.StatusCode = 200;//成功
-            return Json(item);
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, Itme = item });
 
         }
 
@@ -512,9 +678,26 @@ using System.Diagnostics;
         /// <param name="newName"></param>
         /// <param name="newContent"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           UserName = nick_name, 
+        ///           OldName = title, 
+        ///           NewName = newName,
+        ///           NewContent=newContent
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
         [HttpPost]
         public JsonResult updateArticleByTtile(string nick_name, string title, string newName,string newContent)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -523,8 +706,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             //找到文章
@@ -535,8 +719,9 @@ using System.Diagnostics;
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { articleID = A_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
             var info = entity.Article.Find(A_id);
@@ -545,8 +730,9 @@ using System.Diagnostics;
             entity.Entry(info).State = EntityState.Modified;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { UserName = nick_name, OldName = title, NewName = newName,NewContent=newContent });
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, UserName = nick_name, OldName = title, NewName = newName,NewContent=newContent });
         }
 
         /// <summary>
@@ -557,9 +743,25 @@ using System.Diagnostics;
         /// <param name="articlecrid"></param>
         /// <param name="newContent"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag,
+        ///           UserName = nick_name, 
+        ///           crID=articlecrid,
+        ///           NewContent = newContent
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该评论
+        /// </remarks>
         [HttpPost]
         public JsonResult updateArticleCommentByID(string nick_name, int articlecrid, string newContent)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -568,10 +770,23 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
+            //找到文章
+           /* var articleid =
+                   (from c in entity.Article
+                    where (c.Title == title)
+                    select c.ArticleId).Distinct();
+            var A_id = articleid.FirstOrDefault();
+            if (A_id == default)
+            {
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
+            }*/
             //找到文章
             var crid =
                    (from c in entity.ArticleCommentReply
@@ -580,8 +795,9 @@ using System.Diagnostics;
             var cr_id = crid.FirstOrDefault();
             if (cr_id == default)
             {
-                Response.StatusCode = 404;//没找到该评论
-                return Json(new { crID = cr_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该评论
+                flag = 3;
+                return Json(new { ReturnFlag = flag,crID = cr_id, result = "NOT FOUND" });
             }
 
             var info = entity.ArticleCommentReply.Find(cr_id);
@@ -589,8 +805,10 @@ using System.Diagnostics;
             entity.Entry(info).State = EntityState.Modified;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { UserName = nick_name, crID=articlecrid,NewContent = newContent });
+
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag,UserName = nick_name, crID=articlecrid,NewContent = newContent });
         }
 
         /// <summary>
@@ -602,9 +820,24 @@ using System.Diagnostics;
         /// <param name="articlecommentID2"></param>
         /// <param name="content"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           aclid = articlecommentID1, 
+        ///           result = " NOT FOUND"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到要评论的评论
+        /// </remarks>
         [HttpPost]
         public JsonResult createCommentCommentByID(string nick_name, int articlecommentID1, string content)
         {
+            var flag = 0;
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -612,8 +845,9 @@ using System.Diagnostics;
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             var articleid =
@@ -628,8 +862,9 @@ using System.Diagnostics;
             var CR_id = crid.FirstOrDefault();
             if (CR_id == default)
             {
-                Response.StatusCode = 404;
-                return Json(new { aclid = articlecommentID1, result = " NOT FOUND" });
+                //Response.StatusCode = 404;
+                flag = 3;
+                return Json(new { ReturnFlag = flag, aclid = articlecommentID1, result = " NOT FOUND" });
             }
 
 
@@ -644,27 +879,17 @@ using System.Diagnostics;
             entity.ArticleCommentReply.Add(item);
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { articleID = A_id, articlecomment = content });
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, articleID = A_id, articlecomment = content });
         }
 
-        /*
-         public IActionResult Index()
-        {
-            return View();
-        }
-
-       private string GetDebuggerDisplay()
-        {
-            return ToString();
-       }
-         */
+        
         
     }
   
 }
 
- 
- 
- 
- 
+
+
+

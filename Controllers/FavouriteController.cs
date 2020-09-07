@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Temperature.Models;
 
 namespace Temperature.Controllers
 {
+    [Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class FavouriteController : Controller
@@ -21,10 +23,26 @@ namespace Temperature.Controllers
         /// <param name="nick_name">用户名</param>
         /// <param name="folderName">收藏夹名</param>
         /// <returns></returns>
-        /// <response code ="400">该用户已存在同名收藏夹</response>
+        ///<remarks>
+        ///     返回信息：
+        ///     {
+        ///         ReturnFlag = flag,
+        ///         user = nick_name,
+        ///         folder = folderName
+        ///     }
+        ///     
+        ///     flag:
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///     2：该用户已存在同名收藏夹
+        /// </remarks>
         [HttpPost]
         public JsonResult createFolderByNickName(string nick_name,string folderName)
         {
+            var flag = 0;
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -40,8 +58,9 @@ namespace Temperature.Controllers
             var check = checkFolder.FirstOrDefault();
             if(check != default )
             {
-                Response.StatusCode = 400;//该用户已存在同名收藏夹
-                return Json(new { UserName = nick_name, Folder_Name = folderName, result = "Already Exists!" });
+                //Response.StatusCode = 400;//该用户已存在同名收藏夹
+                flag = 2;
+                return Json(new {ReturnFlag = flag, UserName = nick_name, Folder_Name = folderName, result = "Already Exists!" });
             }
 
             var folder = new Favourite();
@@ -50,8 +69,9 @@ namespace Temperature.Controllers
             folder.UserId = id;
             entity.Favourite.Add(folder);
             entity.SaveChanges();
-            Response.StatusCode = 200;
-            return Json(new { user = nick_name, folder = folderName });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, user = nick_name, folder = folderName });
         }
 
         /// <summary>
@@ -61,10 +81,32 @@ namespace Temperature.Controllers
         /// <param name="folderName">文件夹名</param>
         /// <param name="articleID">文章ID</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
+        /// <remarks>
+        ///     flag
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, folderID = F_id, articleId = articleID }
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ReturnFlag = flag, UserID = id, result = "NOT FOUND"}
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, folderID = F_id, result = "NOT FOUND" }
+        ///         
+        ///     4：没有该文章
+        ///     
+        ///         返回：{ ReturnFlag = flag, ArticleID = articleID, result = "Article NOT FOUND!"}
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult addArticleByID(string nick_name,string folderName, int articleID)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -73,8 +115,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                flag = 2;
+                //Response.StatusCode = 405;//没找到该用户
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
             var folderid =
@@ -84,8 +127,9 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if(F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, folderID = F_id, result = "NOT FOUND" });
             }
 
             //FAVOURITE里面更新收藏夹文章数量
@@ -102,8 +146,9 @@ namespace Temperature.Controllers
             var article = entity.Article.Find(articleID);
             if(article ==default)
             {
-                Response.StatusCode = 400;//没有该文章
-                return Json(new { ArticleID = articleID, result = "Article NOT FOUND!" });
+                //Response.StatusCode = 400;//没有该文章
+                flag = 4;
+                return Json(new { ReturnFlag = flag, ArticleID = articleID, result = "Article NOT FOUND!" });
             }
             var collectNum = article.CollectNum;
             if (collectNum == default)
@@ -121,8 +166,9 @@ namespace Temperature.Controllers
             entity.FavouriteArticle.Add(item);
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { folderID = F_id, articleId = articleID });
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, folderID = F_id, articleId = articleID });
         }
 
         /// <summary>
@@ -131,11 +177,28 @@ namespace Temperature.Controllers
         /// <param name="nick_name">用户名</param>
         /// <param name="folderName">收藏夹名</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
-        /// <response code="405">没找到该用户</response>
+        /// <remarks>
+        ///     flag
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, INFO = info }
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ReturnFlag = flag, UserName= nick_name, result = "NOT FOUND"}
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, FolderName=folderName, result = "NOT FOUND" }
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult getFolderInfoByName(string nick_name, string folderName)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -144,8 +207,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserName= nick_name, result = "NOT FOUND" });
             }
 
             //根据用户ID和收藏夹名找到对应收藏夹项
@@ -156,13 +220,15 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if (F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag,FolderName=folderName, result = "NOT FOUND" });
             }
 
             var info = entity.Favourite.Find(F_id);
-            Response.StatusCode = 200;//成功
-            return Json(info);
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, INFO = info });
         }
 
         /// <summary>
@@ -171,11 +237,27 @@ namespace Temperature.Controllers
         /// <param name="nick_name">用户名</param>
         /// <param name="folderName">收藏夹名</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
-        /// <response code="405">没找到该用户</response>
+        /// <remarks>
+        ///     flag
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, UserName = nick_name, FolderName = folderName,result ="success!" }
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ReturnFlag = flag, UserName = nick_name,  result = "NOT FOUND"}
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" }
+        /// </remarks>
         [HttpPost]
         public JsonResult deleteFolderByName(string nick_name, string folderName)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -184,8 +266,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserName = nick_name, result = "NOT FOUND" });
             }
 
             //根据用户ID和收藏夹名找到对应收藏夹项
@@ -196,8 +279,9 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if (F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" });
             }
 
             //ARTICLE表中找到对应记录,并更新记录
@@ -233,8 +317,9 @@ namespace Temperature.Controllers
             entity.Entry(info).State = EntityState.Deleted;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { UserName = nick_name,FolderName = folderName,result ="success!" });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, UserName = nick_name,FolderName = folderName,result ="success!" });
         }
 
         /// <summary>
@@ -244,11 +329,30 @@ namespace Temperature.Controllers
         /// <param name="oldName">旧收藏夹名</param>
         /// <param name="newName">新收藏夹名</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
-        /// <response code="405">没找到该用户</response>
+        /// <remarks>
+        /// 
+        /// 
+        ///     flag
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, UserName = nick_name, OldName = oldName, NewName = newName  }
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ReturnFlag = flag, UserName = nick_name, result = "NOT FOUND"}
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, folderName = oldName, result = "NOT FOUND" }
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult updateFolderNameByName(string nick_name, string oldName,string newName)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -257,8 +361,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserName = nick_name, result = "NOT FOUND" });
             }
 
             //根据用户ID和收藏夹名找到对应收藏夹项
@@ -269,8 +374,9 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if (F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, folderName = oldName, result = "NOT FOUND" });
             }
 
             var info = entity.Favourite.Find(F_id);
@@ -278,8 +384,9 @@ namespace Temperature.Controllers
             entity.Entry(info).State = EntityState.Modified;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;//成功
-            return Json(new { UserName = nick_name, OldName = oldName, NewName = newName });
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, UserName = nick_name, OldName = oldName, NewName = newName });
         }
 
         /// <summary>
@@ -289,12 +396,36 @@ namespace Temperature.Controllers
         /// <param name="folderName">收藏夹名</param>
         /// <param name="articleID">文章ID</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
-        /// <response code="405">没找到该用户</response>
-        /// <response code="400">收藏夹内没有文章</response>
+        /// <remarks>
+        ///     flag
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, result = "successful deleted"}
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ ReturnFlag = flag,UserName = nick_name, result = "NOT FOUND" }
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" }
+        ///         
+        ///     4：收藏夹里没有该文章
+        ///     
+        ///         返回：{ReturnFlag = flag, folderID = F_id, ArticleID = articleID, result = "NOT FOUND"}
+        ///         
+        ///     5：收藏夹为空
+        ///     
+        ///         返回：{ReturnFlag = flag, result = "EMPTY FOLDER"}
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult deleteArticleByID(string nick_name, string folderName, int articleID)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -303,8 +434,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag,UserName = nick_name, result = "NOT FOUND" });
             }
 
             //根据用户ID和收藏夹名找到对应收藏夹项
@@ -315,8 +447,9 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if (F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" });
             }
 
             var folder = entity.Favourite.Find(F_id);
@@ -324,16 +457,18 @@ namespace Temperature.Controllers
             var item = entity.FavouriteArticle.Find(F_id, articleID);
             if(item == default)
             {
-                Response.StatusCode = 406;//收藏夹里没有该文章
-                return Json(new { folderID = F_id, ArticleID = articleID, result = "NOT FOUND" });
+                //Response.StatusCode = 406;//收藏夹里没有该文章
+                flag = 4;
+                return Json(new { ReturnFlag = flag, folderID = F_id, ArticleID = articleID, result = "NOT FOUND" });
             }
 
             //FAVORITE表中文章数量修改
             var num = folder.ArticleNum;
             if (num ==default)
             {
-                Response.StatusCode = 400;//收藏夹内没有文章
-                return Json(new { result = "EMPTY FOLDER" });
+                //Response.StatusCode = 400;//收藏夹内没有文章
+                flag = 5;
+                return Json(new { ReturnFlag = flag, result = "EMPTY FOLDER" });
             }
             folder.ArticleNum = num -1;
             entity.Entry(folder).State = EntityState.Modified;
@@ -351,8 +486,9 @@ namespace Temperature.Controllers
             entity.Entry(item).State = EntityState.Deleted;
             entity.SaveChanges();
 
-            Response.StatusCode = 200;
-            return Json(new { result = "successful deleted" });
+            //Response.StatusCode = 200;
+            flag = 1;
+            return Json(new { ReturnFlag = flag, result = "successful deleted" });
         }
 
         /// <summary>
@@ -361,11 +497,28 @@ namespace Temperature.Controllers
         /// <param name="nick_name">用户名</param>
         /// <param name="folderName">收藏夹名</param>
         /// <returns></returns>
-        /// <response code="404">没找到该文件夹</response>
-        /// <response code="405">没找到该用户</response>
+        /// <remarks>
+        ///     flag 
+        ///     
+        ///     0：未操作
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ReturnFlag = flag, result = "successful deleted"}
+        ///         
+        ///     2：没找到该用户
+        ///     
+        ///         返回：{ ReturnFlag = flag,UserName = nick_name, result = "NOT FOUND" }
+        ///         
+        ///     3：没找到该文件夹
+        ///     
+        ///         返回：{ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" }
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticleListByName(string nick_name, string folderName)
         {
+            var flag = 0;
             //根据用户名找到用户ID
             var userid =
                     (from c in entity.User
@@ -374,8 +527,9 @@ namespace Temperature.Controllers
             var id = userid.FirstOrDefault();
             if (id == default)
             {
-                Response.StatusCode = 405;//没找到该用户
-                return Json(new { UserID = id, result = "NOT FOUND" });
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserName = nick_name, result = "NOT FOUND" });
             }
 
             //根据用户ID和收藏夹名找到对应收藏夹ID
@@ -386,8 +540,9 @@ namespace Temperature.Controllers
             var F_id = folderid.FirstOrDefault();
             if (F_id == default)
             {
-                Response.StatusCode = 404;//没找到该文件夹
-                return Json(new { folderID = F_id, result = "NOT FOUND" });
+                //Response.StatusCode = 404;//没找到该文件夹
+                flag = 3;
+                return Json(new { ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" });
             }
 
             var item =
@@ -395,9 +550,9 @@ namespace Temperature.Controllers
                  where u.FavouriteId == F_id
                  select u ).Distinct();
 
-            Response.StatusCode = 200;//成功
-            return Json(item);
-
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, Item = item });
         }
 
        
