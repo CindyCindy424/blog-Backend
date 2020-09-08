@@ -14,7 +14,7 @@ using Temperature.Models;
 
 
 namespace Temperature.Controllers {
-    //[Authorize]
+    [Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class TopicController : Controller {
