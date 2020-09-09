@@ -28,12 +28,25 @@
                  
              </remarks>
         </member>
-        <member name="M:Temperature.Controllers.AccountController.register(System.String,System.String)">
+        <member name="M:Temperature.Controllers.AccountController.nameCheck(System.String)">
+            <summary>
+            判断用户名是否被占用
+            </summary>
+            <param name="username">待注册名字</param>
+            <returns>
+                False: 已占用
+                True：未占用
+            </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.register(System.String,System.String,System.String,System.String,System.String)">
             <summary>
             注册
             </summary>
             <param name="nick_name"></param>
             <param name="password"></param>
+            <param name="email"></param>
+            <param name="tel"></param>
+            <param name="wechat"></param>
             <returns></returns>
             <response code="200">注册成功</response>
             <remarks>
@@ -76,42 +89,25 @@
             </remarks>
             
         </member>
-        <member name="M:Temperature.Controllers.AccountController.updateAvatr(Microsoft.AspNetCore.Http.IFormCollection,System.String)">
+        <member name="M:Temperature.Controllers.AccountController.createPhotoByID(Microsoft.AspNetCore.Http.IFormFileCollection,System.String)">
             <summary>
             上传头像
             </summary>
-            <param name="collection">[FromForm]头像文件</param>
-            <param name="nick_name">昵称</param>
+            <param name="uploadedPhoto">图片文件</param>
+            <param name="nick_name">用户名</param>
+            <response code="200">成功</response>
             <returns></returns>
             <remarks>
-                返回内容：
-                {
-                    UploadFlag = flag
-                }
-                flag:
-                0: 未执行
-                1：成功
-                2：没有找到该用户
+                返回：
+                {uploadPaths = JsonConvert.SerializeObject(allFilePath), createPhotoFlag = createPhotoFlag}
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.AccountController.getAvatrResource(System.String)">
             <summary>
-            返回用户头像（存储的地址）
+            返回头像,用户名错误/没设头像 返回默认头像
             </summary>
             <param name="nick_name">用户名</param>
-            <returns></returns>
-            <remarks>
-                返回实例
-                {
-                    ReturnFlag = flag, 
-                    UserAvatr = user.Avatr
-                }
-                
-                flag:
-                0: 未执行
-                1：成功
-                2：没有找到该用户
-            </remarks>
+            <returns>图片</returns>
         </member>
         <member name="M:Temperature.Controllers.AccountController.getUserInfoByNickName(System.String)">
             <summary>
@@ -241,17 +237,27 @@
             <param name="nick_name">博主用户名</param>
             <returns></returns>
             <remarks>
-                返回内容:
+                返回内容:(成功时）
                 {
                     returnFlag = flag,
-                    fansList = fansID
+                    fansList = {Name,Avator}
                 }
                 
                 flag:
+                
                 0: 未执行
+                
                 1：成功
+                
+                    返回：{ returnFlag = flag, List = {Name,Avator} }
+                
                 2：用户寻找失败
+                
+                    返回：{ returnFlag = flag }
+                
                 3：该用户没有粉丝
+                
+                    返回：{ returnFlag = flag }
                 
             </remarks>
         </member>
@@ -265,14 +271,24 @@
                 返回内容:
                 {
                     returnFlag = flag, 
-                    FollowList =  followID
+                    FollowList =  {Name, Avator}
                 }
                 
                 flag:
+                
                 0: 未执行
+                
                 1：成功
+                
+                    返回：{returnFlag = flag, FollowList ={Name, Avator}}
+                
                 2：没有该用户
+                
+                    返回：{ returnFlag = flag }
+                
                 3：该用户关注的博主为空
+                
+                    返回：{ returnFlag = flag }
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String)">

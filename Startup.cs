@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.FileProviders;
 
 namespace Temperature
 {
@@ -38,11 +39,11 @@ namespace Temperature
             {
                 /*options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Description = "新增修改：\n1）添加了Token验证身份信息 ； 2）添加了接口返回内容说明（暂时缺Topic 和 Photo）； 3）将对response code的所有修改删除，并改成以flag表明当前操作状态（具体表意见接口内注释）"
+                    Description = "【0908 v1】 新增修改：1）account头像相关接口"
                 });*/
 
                 options.EnableAnnotations();  //配置返回参数的注释
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "新增修改：\n1）添加了Token验证身份信息 ； \n2）添加了接口返回内容说明（暂缺Topic 和 Photo）； \n3）将对response code的所有修改删除，并改成以flag表明当前操作状态（具体表意见接口内注释）" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "【0908 v1】 新增修改：1）account头像相关接口,2)修改EF连接时间-40s" });
                 // ��ȡxml�ļ���
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 // ��ȡxml�ļ�·��
@@ -51,6 +52,40 @@ namespace Temperature
                 // ���ӿ�������ע�ͣ�true��ʾ��ʾ������ע��
                // var xmlPath = "./Temperature.xml";
                 options.IncludeXmlComments(xmlPath, true);
+
+                //配置token显示
+                //Bearer 的scheme定义
+                var securityScheme = new OpenApiSecurityScheme()
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    //参数添加在头部
+                    In = ParameterLocation.Header,
+                    //使用Authorize头部
+                    Type = SecuritySchemeType.Http,
+                    //内容为以 bearer开头
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                };
+                //把所有方法配置为增加bearer头部信息
+                var securityRequirement = new OpenApiSecurityRequirement
+                    {
+                        {
+                                new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "bearerAuth"
+                                    }
+                                },
+                                new string[] {}
+                        }
+                    };
+
+                //注册到swagger中
+                options.AddSecurityDefinition("bearerAuth", securityScheme);
+                options.AddSecurityRequirement(securityRequirement);
             });
             #endregion
             //services.AddControllers();
@@ -107,7 +142,15 @@ namespace Temperature
                 options.AllowCredentials();
             });
 
-            
+            //开启静态资源访问
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), /*@"StaticFiles"*/@"BlogPics")),
+                RequestPath = new PathString("/BlogPics")
+            });
+
+
 
             // ����Swagger�й��м��
             app.UseSwagger();

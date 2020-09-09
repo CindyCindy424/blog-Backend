@@ -19,6 +19,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Drawing;
 
 /** 备注：
  * 这里用户登录只需要输入NickName,然后自动匹配数据库中该用户的id，然后验证密码正确性
@@ -41,6 +42,8 @@ namespace Temperature.Controllers
         {
             My_Environment = _environment;
         }
+        string PicsRootPath = "BlogPics\\Avator";
+
 
         //生成token
         [HttpGet]
@@ -162,6 +165,37 @@ namespace Temperature.Controllers
         }
 
 
+        /// <summary>
+        /// 判断用户名是否被占用
+        /// </summary>
+        /// <param name="username">待注册名字</param>
+        /// <returns>
+        ///     False: 已占用
+        ///     True：未占用
+        /// </returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult nameCheck(string username)
+        {
+            User user = new User();
+            //JsonData jsondata = new JsonData();  //json格式的数据
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == username
+                     select c.UserId).Distinct();
+            if (userid.FirstOrDefault() != default)
+            {
+                flag = 2; //用户名已经被占用
+                return Json(new { result = "False" });
+            }
+            else
+            { 
+                flag = 1;//用户名可以使用。
+                return Json(new { result = "True" });
+            }
+        }
+
         /*
         /// <summary>
         /// 注册
@@ -204,6 +238,9 @@ namespace Temperature.Controllers
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="password"></param>
+        /// <param name="email"></param>
+        /// <param name="tel"></param>
+        /// <param name="wechat"></param>
         /// <returns></returns>
         /// <response code="200">注册成功</response>
         /// <remarks>
@@ -219,7 +256,7 @@ namespace Temperature.Controllers
         /// </remarks>
         [AllowAnonymous]
         [HttpPost]
-        public ActionResult register(string nick_name, string password)
+        public ActionResult register(string nick_name, string password,string email,string tel,string wechat)
         {
             User user = new User();
             //JsonData jsondata = new JsonData();  //json格式的数据
@@ -239,6 +276,10 @@ namespace Temperature.Controllers
                 //这里id是自增类型
                 user.NickName = nick_name;
                 user.Password = password;
+                user.Email = email;
+                user.Tel = tel;
+                user.Wechat = wechat;
+                user.Avatr = "defaultAvator.png";
                 entity.User.Add(user); //把user这个实体加入数据库
                 entity.SaveChanges();
                 flag = 1; //注册成功
@@ -381,7 +422,7 @@ namespace Temperature.Controllers
                 return Json(new { Success = false, Message = "请选择要上传的文件！" }, JsonRequestBehavior.AllowGet);
             }
         }*/
-
+        /*
         /// <summary>
         /// 上传头像
         /// </summary>
@@ -425,6 +466,8 @@ namespace Temperature.Controllers
             string fileExtention = System.IO.Path.GetExtension(file.FileName);//--.jpg
             string path = Guid.NewGuid().ToString() + fileExtention;
             string basepath = My_Environment.ContentRootPath;//en.WebRootPath-》wwwroot的目录; .ContentRootPath到达WebApplication的项目目录
+            //string basepath = "../"
+            string testpath = My_Environment.WebRootPath;
             string savePath = basepath + "\\user's_avatr\\" + path;
             if (!Directory.Exists(savePath))
             {
@@ -442,41 +485,321 @@ namespace Temperature.Controllers
                 //Response.StatusCode = 201;//成功
 
             }
-            return Json(new {  UploadFlag = flag });
-        }
-
+            return Json(new {  UploadFlag = flag ,result = testpath});
+        }*/
+        /*
         /// <summary>
-        /// 返回用户头像（存储的地址）
+        /// 上传头像图片
         /// </summary>
-        /// <param name="nick_name">用户名</param>
+        /// <param name="files">图片文件</param>
         /// <returns></returns>
         /// <remarks>
-        ///     返回实例
-        ///     {
-        ///         ReturnFlag = flag, 
-        ///         UserAvatr = user.Avatr
-        ///     }
+        ///     返回：
+        ///     
+        ///     {UploadFlag = flag}
         ///     
         ///     flag:
-        ///     0: 未执行
+        ///     
+        ///     0:未操作
         ///     1：成功
         ///     2：没有找到该用户
         /// </remarks>
-        [HttpPost]
-        public JsonResult getAvatrResource(string nick_name)
+        [HttpPost("Photos")]
+        public async Task<IActionResult> updateAvatr(IFormFileCollection files,string nick_name)
         {
+            int flag = 0;
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
                      select c.UserId).Distinct();
             var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+                //Response.StatusCode = 202;//没有该用户
+                return Json(new { UploadFlag = flag });
+            }
             var user = entity.User.Find(id); //在数据库中根据key找到相应记录
-            var flag = 0;
-            if (user != default)
-                flag = 2; //寻找用户失败
+
+
+
+
+            long size = files.Sum(f => f.Length);
+            //var fileFolder = Path.Combine(My_Environment.WebRootPath, "Photos");
+            var fileFolder = Path.Combine("../BlogPics/", "Avator");
+
+            if (!Directory.Exists(fileFolder))
+                Directory.CreateDirectory(fileFolder);
+
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = DateTime.Now.ToString("yyyyMMddHHmmss") +nick_name+Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(fileFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    //地址存入信息
+                    user.Avatr = fileName;
+                    entity.Entry(user).State = EntityState.Modified;
+                    entity.SaveChanges();
+                    flag = 1;
+                }
+                
+            }
+
+            return Ok(new { UploadFlag = flag });
+        }*/
+
+        /// <summary>
+        /// 上传头像
+        /// </summary>
+        /// <param name="uploadedPhoto">图片文件</param>
+        /// <param name="nick_name">用户名</param>
+        /// <response code="200">成功</response>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     {uploadPaths = JsonConvert.SerializeObject(allFilePath), createPhotoFlag = createPhotoFlag}
+        /// </remarks>
+        
+        [HttpPost]
+        public ActionResult createPhotoByID(IFormFileCollection uploadedPhoto, string nick_name)
+        {
+            DateTime dateTime = DateTime.Now;
+            var msg = "";
+            int createPhotoFlag = 0;
+            string uploadsFolder = "";
+            string uniqueFileName = "";
+            string filePath = "";
+            //string root = "http:///139.224.255.43:7779/";
+            List<string> allFilePath = new List<string>();
+            //List<string> allPhotoID = new List<string>();
+
+            if (uploadedPhoto == null) return BadRequest();
+
+            //找到用户
+            //int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                createPhotoFlag = 2; //没有找到该用户
+                //Response.StatusCode = 202;//没有该用户
+                return Json(new { UploadFlag = createPhotoFlag });
+            }
+            var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+
+            for (int i = 0; i < uploadedPhoto.Count; i++)
+            {
+                try
+                {
+                    //fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + nick_name + Path.GetExtension(file.FileName);
+                    //filePath = Path.Combine(fileFolder, fileName);
+
+
+                    //uploadsFolder = Path.Combine(PicsRootPath, userID, albumID); //计算存储路径
+                    uploadsFolder = Path.Combine(PicsRootPath);
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedPhoto[i].FileName;
+                    filePath =Path.Combine(uploadsFolder, uniqueFileName);
+                   // string myPath = Path.Combine(root, filePath);
+
+                    /* Photo photo = new Photo();
+                     photo.AlbumId = int.Parse(albumID);
+                     photo.PhotoLikes = 0;
+                     photo.VisitNum = 0;
+                     photo.PhotoAddress = filePath;
+                     photo.PhotoUploadTime = dateTime;
+                     photo.UserId = int.Parse(userID);*/
+
+                   
+
+                    user.Avatr = filePath;
+                    entity.Entry(user).State = EntityState.Modified;
+                    entity.SaveChanges();
+                    //flag = 1;
+                    /*entity.Photo.Add(photo); //将图片信息添加到数据库中
+                    entity.SaveChanges();
+                    entity.Entry(photo); //获取新插入的photo的photoID*/
+
+                    uploadedPhoto[i].CopyTo(new FileStream(filePath, FileMode.Create)); //存储图片到本地 持久化
+
+                    allFilePath.Add(filePath);
+                    //allPhotoID.Add(photo.PhotoId.ToString());
+
+                    //Response.StatusCode = 200;
+                    createPhotoFlag = 1;
+                }
+                catch (Exception e)
+                {
+                    Response.StatusCode = 403;
+                    createPhotoFlag = 0;
+                    msg = e.Message;
+                    Console.WriteLine(e.Message);
+                }
+            }
+
+            var resultJson = new
+            {
+                uploadPaths = JsonConvert.SerializeObject(allFilePath),
+                createPhotoFlag = createPhotoFlag,
+                //getmsg = msg,
+            };
+
+            return Json(resultJson);
+        }
+
+
+
+
+        /// <summary>
+        /// 返回头像,用户名错误/没设头像 返回默认头像
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <returns>图片</returns>
+       
+        [HttpPost]
+        //[Route("file/image/{width}/{name}")]
+        // <param name="width">所访问图片的宽度,高度自动缩放,大于原图尺寸或者小于等于0返回原图</param>
+        public IActionResult getAvatrResource(string nick_name)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+                //Response.StatusCode = 202;//没有该用户
+                return Json(new { UploadFlag = flag });
+            }
+            var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            var name = user.Avatr;
+
+            //var appPath = AppContext.BaseDirectory.Split("\\bin\\")[0] + "/image/";
+            flag = 1;
+            //var appPath =  "../BlogPics/Avator";
+            //var errorImage = "http://139.224.255.43:7779/"+PicsRootPath +"\\default\\"+ "defaultAvator.png";//没有找到图片
+            //var imgPath = string.IsNullOrEmpty(name) ? errorImage : "http://139.224.255.43:7779/" + name;
+
+            var errorImage = PicsRootPath + "\\default\\" + "defaultAvator.png";//没有找到图片
+            var imgPath = string.IsNullOrEmpty(name) ? errorImage : name;
+
+            //var imgPath = appPath + "/"+name;
+            //获取图片的返回类型
+            return Json(new { Flag = flag,Path = imgPath });
+            /*var contentTypDict = new Dictionary<string, string> {
+                {"jpg","image/jpeg"},
+                {"jpeg","image/jpeg"},
+                {"jpe","image/jpeg"},
+                {"png","image/png"},
+                {"gif","image/gif"},
+                {"ico","image/x-ico"},
+                {"tif","image/tiff"},
+                {"tiff","image/tiff"},
+                {"fax","image/fax"},
+                {"wbmp","image//vnd.wap.wbmp"},
+                {"rp","image/vnd.rn-realpix"}
+            };
+            var contentTypeStr = "image/jpeg";
+            var imgTypeSplit = name.Split('.');
+            var imgType = imgTypeSplit[imgTypeSplit.Length - 1].ToLower();
+            //未知的图片类型
+            if (!contentTypDict.ContainsKey(imgType))
+            {
+                imgPath = errorImage;
+            }
             else
-                flag = 1; //寻找成功
-            return Json(new { ReturnFlag = flag, UserAvatr = user.Avatr });
+            {
+                contentTypeStr = contentTypDict[imgType];
+            }
+            //图片不存在
+            if (!new FileInfo(imgPath).Exists)
+            {
+                imgPath = errorImage;
+            }
+            //原图
+            if (width <= 0)
+            {
+                using (var sw = new FileStream(imgPath, FileMode.Open))
+                {
+                    var bytes = new byte[sw.Length];
+                    sw.Read(bytes, 0, bytes.Length);
+                    sw.Close();
+                    return new FileContentResult(bytes, contentTypeStr);
+                }
+            }
+            //缩小图片
+            using (var imgBmp = new Bitmap(imgPath))
+            {
+                //找到新尺寸
+                var oWidth = imgBmp.Width;
+                var oHeight = imgBmp.Height;
+                var height = oHeight;
+                if (width > oWidth)
+                {
+                    width = oWidth;
+                }
+                else
+                {
+                    height = width * oHeight / oWidth;
+                }
+                var newImg = new Bitmap(imgBmp, width, height);
+                newImg.SetResolution(72, 72);
+                var ms = new MemoryStream();
+                newImg.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                var bytes = ms.GetBuffer();
+                ms.Close();
+                return new FileContentResult(bytes, contentTypeStr);
+            }
+        }*/
+
+
+            /*
+
+            /// <summary>
+            /// 返回用户头像（存储的地址）
+            /// </summary>
+            /// <param name="nick_name">用户名</param>
+            /// <returns></returns>
+            /// <remarks>
+            ///     返回实例
+            ///     {
+            ///         ReturnFlag = flag, 
+            ///         UserAvatr = user.Avatr
+            ///     }
+            ///     
+            ///     flag:
+            ///     0: 未执行
+            ///     1：成功
+            ///     2：没有找到该用户
+            /// </remarks>
+            [HttpPost]
+            public JsonResult getAvatrResource(string nick_name)
+            {
+                var userid =
+                        (from c in entity.User
+                         where c.NickName == nick_name
+                         select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();
+                var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+                var flag = 0;
+                if (user != default)
+                    flag = 2; //寻找用户失败
+                else
+                    flag = 1; //寻找成功
+                return Json(new { ReturnFlag = flag, UserAvatr = user.Avatr });
+            */
         }
 
 
@@ -832,6 +1155,13 @@ namespace Temperature.Controllers
 
         }
 
+
+        struct FanInfo
+        {
+            public string FanName;
+            public string FanAvator;
+        }
+        /*
         /// <summary>
         /// 返回粉丝列表
         /// </summary>
@@ -841,7 +1171,7 @@ namespace Temperature.Controllers
         ///     返回内容:
         ///     {
         ///         returnFlag = flag,
-        ///         fansList = fansID
+        ///         fansList = fansName
         ///     }
         ///     
         ///     flag:
@@ -870,7 +1200,27 @@ namespace Temperature.Controllers
                 (from u in entity.UserFollow
                  where u.PassiveUserId == id
                  select u.ActiveUserId).Distinct();
-            if(fansID.FirstOrDefault()==default)
+
+            var fansID =
+                (from u in entity.UserFollow
+                 where u.PassiveUserId == id
+                 select u.ActiveUserId).ToList();
+            //Dictionary<string, string> userList = new Dictionary<string, string>();
+
+            
+
+            foreach (var fan in fansID)
+            {
+                var info =
+                    (from u in entity.User
+                     where u.UserId == fan
+                     select new { u.NickName, u.Avatr } ).Distinct(); //查出用户名和头像
+
+                userList.Add("Username", name.FirstOrDefault());
+            }
+
+
+            if (fansID.FirstOrDefault()==default)
             {
                 flag = 3;//该用户没有粉丝
                 return Json(new { returnFlag = flag });
@@ -880,6 +1230,171 @@ namespace Temperature.Controllers
             return Json(new { returnFlag = flag,fansList = fansID});
         }
 
+
+        /// <summary>
+        /// 返回粉丝列表(xiugai)
+        /// </summary>
+        /// <param name="nick_name">博主用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回内容:
+        ///     {
+        ///         returnFlag = flag,
+        ///         fansList = fansName
+        ///     }
+        ///     
+        ///     flag:
+        ///     0: 未执行
+        ///     1：成功
+        ///     2：用户寻找失败
+        ///     3：该用户没有粉丝
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getFansListByNickName2(string nick_name)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (id == default)
+            {
+                flag = 2;//用户寻找失败
+                return Json(new { returnFlag = flag });
+            }
+            var fansID =
+                (from u in entity.UserFollow
+                 where u.PassiveUserId == id
+                 select u.ActiveUserId).Distinct();
+
+            var fansID =
+                (from u in entity.UserFollow
+                 where u.PassiveUserId == id
+                 select u.ActiveUserId).ToList();
+            Dictionary<string, string> userList = new Dictionary<string, string>();
+            if (fansID.FirstOrDefault() == default)
+            {
+                flag = 3;//该用户没有粉丝
+                return Json(new { returnFlag = flag });
+            }
+
+            //Array list = [];
+           // FanInfo[] list = new FanInfo[100];
+            var cnt = 0;
+            List<FanInfo> FansList = new List<FanInfo>();
+
+            // foreach (var fan in fansID)
+            //{
+            cnt++;
+            var fan = fansID.First();
+                //var fans = fansID.FirstOrDefault();
+                var name =
+                    (from u in entity.User
+                     where u.UserId == fan
+                     select u.NickName).Distinct(); //查出用户名
+                var Name = name.FirstOrDefault();
+                var avator =
+                    (from u in entity.User
+                     where u.UserId == fan
+                     select u.Avatr).Distinct(); //头像
+                var Avator = avator.FirstOrDefault();
+            if (Name == default)
+            {
+                flag = 4; //break; }
+            }
+
+                //userList.Add("Fan" + cnt, new {Name,Avator });
+
+                FanInfo item = new FanInfo();
+                item.FanName = Name;
+                item.FanAvator = Avator;
+
+                FansList.Add(item);
+            //list[cnt] = item;
+               // userList.Add("Username", name.FirstOrDefault());
+           // }
+
+
+            
+            flag = 1;
+            //Response.StatusCode = 200;
+            return Json(new { returnFlag = flag, fansList = FansList,Thename = item.FanName, theA = item.FanAvator,ITEM= item });
+        }*/
+
+        /// <summary>
+        /// 返回粉丝列表
+        /// </summary>
+        /// <param name="nick_name">博主用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回内容:(成功时）
+        ///     {
+        ///         returnFlag = flag,
+        ///         fansList = {Name,Avator}
+        ///     }
+        ///     
+        ///     flag:
+        ///     
+        ///     0: 未执行
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{ returnFlag = flag, List = {Name,Avator} }
+        ///     
+        ///     2：用户寻找失败
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///     
+        ///     3：该用户没有粉丝
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getFansListByNickName(string nick_name)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (id == default)
+            {
+                flag = 2;//用户寻找失败
+                return Json(new { returnFlag = flag });
+            }
+            /*var fansID =
+                (from u in entity.UserFollow
+                 where u.PassiveUserId == id
+                 select u.ActiveUserId).Distinct();*/
+
+            var fansID =
+                (from  u in entity.UserFollow
+                            join right in entity.User
+                            on u.ActiveUserId equals right.UserId
+                 where u.PassiveUserId == id
+                 select new { Name = right.NickName,Avator  = right.Avatr}).Distinct();
+            if(fansID.FirstOrDefault() == default)
+            {
+                flag = 3;//该用户没有粉丝
+                return Json(new { returnFlag = flag });
+            }
+
+            flag = 1;
+            //Response.StatusCode = 200;
+            // return Json(new { returnFlag = flag, fansList = FansList, Thename = item.FanName, theA = item.FanAvator, ITEM = item });
+            return Json(new { returnFlag = flag, List = fansID });
+        
+        }
+
+
+
+        /*
         /// <summary>
         /// 返回关注的博主列表
         /// </summary>
@@ -893,10 +1408,18 @@ namespace Temperature.Controllers
         ///     }
         ///     
         ///     flag:
+        ///     
         ///     0: 未执行
+        ///     
         ///     1：成功
+        ///         返回：{ returnFlag = flag, List = fansID }
+        ///     
         ///     2：没有该用户
+        ///         返回：{ returnFlag = flag }
+        ///     
         ///     3：该用户关注的博主为空
+        ///     
+        ///         返回：{ returnFlag = flag }
         /// </remarks>
         [HttpPost]
         public JsonResult getFollowListByNickName(string nick_name)
@@ -926,6 +1449,82 @@ namespace Temperature.Controllers
                 flag = 1;//成功
             //Response.StatusCode = 200; //成功
             return Json(new { returnFlag = flag,FollowList =  followID });
+        }*/
+
+        /// <summary>
+        /// 返回关注的博主列表
+        /// </summary>
+        /// <param name="nick_name">博主用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回内容:
+        ///     {
+        ///         returnFlag = flag, 
+        ///         FollowList =  {Name, Avator}
+        ///     }
+        ///     
+        ///     flag:
+        ///     
+        ///     0: 未执行
+        ///     
+        ///     1：成功
+        ///     
+        ///         返回：{returnFlag = flag, FollowList ={Name, Avator}}
+        ///     
+        ///     2：没有该用户
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///     
+        ///     3：该用户关注的博主为空
+        ///     
+        ///         返回：{ returnFlag = flag }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getFollowListByNickName(string nick_name)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                flag = 2;//没有该用户
+                return Json(new { returnFlag = flag });
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            /*
+             var fansID =
+                (from  u in entity.UserFollow
+                            join right in entity.User
+                            on u.ActiveUserId equals right.UserId
+                 where u.PassiveUserId == id
+                 select new { Name = right.NickName,Avator  = right.Avatr}).Distinct();
+            if(fansID.FirstOrDefault() == default)
+            {
+                flag = 3;//该用户没有粉丝
+                return Json(new { returnFlag = flag });
+            }
+             */
+
+            var followID =
+                (from u in entity.UserFollow
+                            join right in entity.User
+                            on u.PassiveUserId equals right.UserId
+                 where u.ActiveUserId == id
+                 select new { Name = right.NickName,Avator = right.Avatr}).Distinct();
+            if (followID.FirstOrDefault() == default)
+            {
+                flag = 3;//该用户关注的博主为空
+                return Json(new { returnFlag = flag });
+            }
+            
+            
+                flag = 1;//成功
+            //Response.StatusCode = 200; //成功
+            return Json(new { returnFlag = flag, FollowList = followID });
         }
 
 

@@ -8,11 +8,16 @@ namespace Temperature.Models
     {
         public blogContext()
         {
+            //this.context.Database.CommandTimeout = 40; //seconds
+            //blogContext.CommandTimeout = 1 * 60;
+            this.Database.SetCommandTimeout(40);
         }
 
         public blogContext(DbContextOptions<blogContext> options)
             : base(options)
         {
+            this.Database.SetCommandTimeout(40);
+
         }
 
         public virtual DbSet<Album> Album { get; set; }
@@ -42,7 +47,7 @@ namespace Temperature.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySQL("server=cdb-fmybdjyc.cd.tencentcdb.com;port=10118;user=root;password=esgzhuanyeshixi2020;database=blog");
+                optionsBuilder.UseMySQL("server=cdb-fmybdjyc.cd.tencentcdb.com;port=10118;user=root;password=esgzhuanyeshixi2020;database=blog;pooling=true;connection lifetime=0;min pool size = 10;max pool size=512");
             }
         }
 
