@@ -450,6 +450,14 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1,
+        ///   topicCount = 1,
+        ///   
+        ///   失败：flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getUserTopicNum(string userID) {
             int flag = 0;
@@ -480,7 +488,8 @@ namespace Temperature.Controllers {
         /// <returns></returns>
         /// <remarks>
         /// return {
-        ///   成功：flag = 1
+        ///   成功：flag = 1,
+        ///   userTopicAnswerCount = 1,
         ///   
         ///   失败：flag = 0
         /// }
