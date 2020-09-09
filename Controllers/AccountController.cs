@@ -279,7 +279,7 @@ namespace Temperature.Controllers
                 user.Email = email;
                 user.Tel = tel;
                 user.Wechat = wechat;
-                user.Avatr = "defaultAvator.png";
+                user.Avatr = "BlogPics\\Avator\\defaultAvator.png";
                 entity.User.Add(user); //把user这个实体加入数据库
                 entity.SaveChanges();
                 flag = 1; //注册成功
@@ -555,7 +555,7 @@ namespace Temperature.Controllers
         }*/
 
         /// <summary>
-        /// 上传头像
+        /// 上传头像( 注：修改了接口名字）
         /// </summary>
         /// <param name="uploadedPhoto">图片文件</param>
         /// <param name="nick_name">用户名</param>
@@ -567,7 +567,7 @@ namespace Temperature.Controllers
         /// </remarks>
         
         [HttpPost]
-        public ActionResult createPhotoByID(IFormFileCollection uploadedPhoto, string nick_name)
+        public ActionResult createAvatorByName(IFormFileCollection uploadedPhoto, string nick_name)
         {
             DateTime dateTime = DateTime.Now;
             var msg = "";

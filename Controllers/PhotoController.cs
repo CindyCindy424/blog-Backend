@@ -19,7 +19,7 @@ namespace Temperature.Controllers {
     [ApiController]
     public class PhotoController : Controller {
         blogContext entity = new blogContext();
-        string albumRootPath = "albums";
+        string albumRootPath = "BlogPics/albums";
 
         /// <summary>
         /// 新建相簿
@@ -116,30 +116,36 @@ namespace Temperature.Controllers {
         /// return {
         /// 成功：
         /// "Flag": 1
-        ///"uploadPaths": "[\"albums\3\2\413127ac-77f4-474f-8b3f-8561dc7c5d21_矢量日本特色文化集合元素.png\"]", //静态资源路径
+        ///"uploadPaths": "[\"BlogPics/albums\5\6\13302d1d-9371-40c5-8f88-5336a4706d17_background03.jpg\"]", //静态资源路径
         ///"coorespondingPhotoIDs": "[\"2\"]", //上传图片所获得的photoID 按照上传顺序排列
         ///
         /// 失败：
         /// "Flag": 0
         /// }
         /// </remarks>
-    [HttpPost]
+        [HttpPost]
         public ActionResult createPhotoByID(IFormFileCollection uploadedPhoto, string albumID, string userID) {
             DateTime dateTime = DateTime.Now;
             int createPhotoFlag = 0;
             string uploadsFolder = "";
             string uniqueFileName = "";
             string filePath = "";
+            string msg="";
             List<string> allFilePath = new List<string>();
             List<string> allPhotoID = new List<string>();
 
             if (uploadedPhoto == null) return BadRequest();
+
+            
 
             for (int i = 0; i < uploadedPhoto.Count; i++) {
                 try {
                     uploadsFolder = Path.Combine(albumRootPath, userID, albumID); //计算存储路径
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + uploadedPhoto[i].FileName;
                     filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
 
                     Photo photo = new Photo();
                     photo.AlbumId = int.Parse(albumID);
@@ -162,6 +168,7 @@ namespace Temperature.Controllers {
                 }
                 catch (Exception e) {
                     createPhotoFlag = 0;
+                    msg = e.Message;
                     Console.WriteLine(e.Message);
                 }
             }
@@ -169,6 +176,7 @@ namespace Temperature.Controllers {
             var resultJson = new {
                 uploadPaths = JsonConvert.SerializeObject(allFilePath),
                 coorespondingPhotoIDs = JsonConvert.SerializeObject(allPhotoID),
+                Msg = msg,
                 createPhotoFlag = createPhotoFlag,
             };
 
@@ -228,12 +236,12 @@ namespace Temperature.Controllers {
         /// <param name="albumID"></param>
         /// <param name="userID"></param>
         /// <response code="200">成功</response>
-        /// <response code="403">无法删除相册，出现错误/异常</response>
         /// <returns></returns>
         [HttpPost]
         public ActionResult deleteAlbumByID(string albumID, string userID) {
             int deleteAlbumFlag = 0;
             string deleteFilePath = "";
+            string msg = "";
 
             try {
                 deleteFilePath = Path.Combine(albumRootPath, userID, albumID);
@@ -246,9 +254,10 @@ namespace Temperature.Controllers {
                 deleteAlbumFlag = 1;
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
+                msg = e.Message;
                 deleteAlbumFlag = 0;
             }
-            return Json(new {deleteAlbumFlag = deleteAlbumFlag });
+            return Json(new {deleteAlbumFlag = deleteAlbumFlag ,Msg = msg});
         }
 
         /// <summary>
@@ -290,7 +299,6 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="photoID"></param>
         /// <response code="200">成功</response>
-        /// <response code="403">无法删除，出现错误/异常</response>
         /// <returns></returns>
         /// <remarks>
         /// return {
@@ -305,6 +313,7 @@ namespace Temperature.Controllers {
         public ActionResult deletePhotoByID(string photoID) {
             int deletePhotoFlag = 0;
             string filePath = "";
+            string msg = "";
             try {
                 Photo photo = entity.Photo.Single(c => c.PhotoId == int.Parse(photoID));
                 filePath = photo.PhotoAddress;
@@ -316,10 +325,11 @@ namespace Temperature.Controllers {
                 deletePhotoFlag = 1;
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
+                msg = e.Message;
                 deletePhotoFlag = 0;
             }
 
-            return Json(new {deletePhotoFlag = deletePhotoFlag });
+            return Json(new { deletePhotoFlag = deletePhotoFlag,Msg = msg }) ;
         }
 
         /// <summary>

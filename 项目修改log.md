@@ -12,3 +12,6 @@
 
 3. 0907 部署3：
 	1）修改lzy对应要求——accountcontroller
+
+4. 0909 部署v1：
+	1）修改PhotoController

@@ -147,10 +147,10 @@ namespace Temperature
             {
                 FileProvider = new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), /*@"StaticFiles"*/@"BlogPics")),
-                RequestPath = new PathString("/BlogPics")
+                RequestPath = new PathString("/BlogPics"),
             });
 
-
+            
 
             // ����Swagger�й��м��
             app.UseSwagger();
