@@ -397,6 +397,32 @@ namespace Temperature.Controllers {
         }
 
         /// <summary>
+        /// 某图片的访问次数加1
+        /// </summary>
+        /// <param name="photoID"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult increasePhotoVisit(string photoID) {
+            int flag = 0;
+
+            try {
+                var photo = entity.Photo.Single(c => c.PhotoId == int.Parse(photoID) );
+                photo.VisitNum += 1;
+                entity.Photo.Update(photo);
+                entity.SaveChanges();
+                entity.Entry(photo);
+
+                flag = 1;
+                return Json(new { photo = JsonConvert.SerializeObject(photo), flag = flag });
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+
+                return Json(new { photo = "", flag = flag });
+            }
+        }
+
+        /// <summary>
         /// 获取图片评论
         /// </summary>
         /// <param name="photoID"></param>

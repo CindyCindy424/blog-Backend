@@ -28,19 +28,29 @@ namespace Temperature.Controllers {
         /// <param name="userID"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult createTopicAnswerByID(string content, string topicID, string userID) {
+        public ActionResult createTopicAnswerByID(string content, string topicID, string userID, string parentID = "-1") {
             DateTime dateTime = DateTime.Now; //获取当前时间
             int cerateTopicAnswerFlag = 0;
             try {
-                Topic topic = new Topic {
+                //新建answer
+                TopicAnswerReply topicAnswerReply = new TopicAnswerReply {
                     TopicId = int.Parse(topicID),
-                    TopicContent = content,
-                    AnswerNum = 0,
+                    AnswerLikes = 0,
+                    AnswerContent = content,
                     UserId = int.Parse(userID),
-                    TopicUploadTime = dateTime,
+                    AnswerUploadTime = dateTime,
+                    ParentAnswerId = int.Parse(parentID),
                 };
-                entity.Add(topic);
+                entity.TopicAnswerReply.Add(topicAnswerReply);
                 int nums = entity.SaveChanges();
+
+                //更新相应topic answer数量
+                Topic topic = entity.Topic.Single(c => c.TopicId == int.Parse(topicID));
+                topic.AnswerNum += 1;
+                entity.Topic.Update(topic);
+                entity.SaveChanges();
+                
+
                 cerateTopicAnswerFlag = 1;
             } catch (Exception e) {
                 cerateTopicAnswerFlag = 0;
@@ -145,10 +155,10 @@ namespace Temperature.Controllers {
             return Json(returnJson);
         }
 
-        [HttpPost]
-        public void getBriefAnnouncementByID(int pageNum, int pageSize) {
+        //[HttpPost]
+        //public void getBriefAnnouncementByID(int pageNum, int pageSize) {
 
-        }
+        //}
 
         /// <summary>
         /// 分页获取topic
@@ -211,5 +221,146 @@ namespace Temperature.Controllers {
             }
             return Json(returnJson);
         }
+
+
+        /// <summary>
+        /// 根据zoneID返回topic总共的数量
+        /// </summary>
+        /// <param name="zoneID"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getTopicNumberByZoneID(string zoneID) {
+            int getTopicNumberFlag = 0;
+            int totalNumber = -1;
+
+            try {
+                var topic = (from c in entity.Topic
+                             where c.ZoneId == int.Parse(zoneID)
+                             select c);
+                totalNumber = topic.Count();
+                getTopicNumberFlag = 1;
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                getTopicNumberFlag = 0;
+            }
+            return Json(new { getTopicNumberFlag = getTopicNumberFlag, totalNumber = totalNumber });
+        }
+
+        /// <summary>
+        /// 获取最新发布的topic
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getNewestTopic(int takeTopicNum) {
+            int flag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+
+            try {
+                var content = entity.Topic.OrderByDescending(c => c.TopicUploadTime).Take(takeTopicNum);
+
+                returnJson.Add("topics", JsonConvert.SerializeObject(content));
+                flag = 1;
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            returnJson.Add("flag", flag.ToString());
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 获取最热的topic
+        /// </summary>
+        /// <param name="takeTopicNum"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getHotestTopic(int takeTopicNum) {
+            int flag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+
+            try {
+                var content = entity.Topic.OrderByDescending(c => c.AnswerNum).Take(takeTopicNum);
+
+                returnJson.Add("topics", JsonConvert.SerializeObject(content));
+                flag = 1;
+            }
+            catch (Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            returnJson.Add("flag", flag.ToString());
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 获取相应topicID的内容、评论、评论者信息
+        /// </summary>
+        /// <param name="topicID"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getTopicDetailByID(string topicID) {
+            int flag = 0;
+            List<string> answerUserList = new List<string>();
+
+            try {
+                Topic topic = entity.Topic.Single(c => c.TopicId == int.Parse(topicID));
+
+                //选取此topic的所有一级评论
+                var topicAnswer = (from c in entity.TopicAnswerReply
+                                   where c.TopicId == topic.TopicId && c.ParentAnswerId == -1
+                                   select new {
+                                       TopicAnswerID = c.TopicAnswerId,
+                                       TopicID = c.TopicId,
+                                       AnswerLikes = c.AnswerLikes,
+                                       Content = c.AnswerContent,
+                                       UserID = c.UserId,
+                                       UploadTime = c.AnswerUploadTime,
+                                       ParentAnswerID = c.ParentAnswerId
+                                   });
+
+                //每个一级评论中
+                foreach(var t in topicAnswer.ToList()) {
+                    var a = new { topicInfo = JsonConvert.SerializeObject(t),
+                                  userComments = new List<string>()};
+
+                    var allSecondLevelAnswer = (from c in entity.TopicAnswerReply
+                                                where c.ParentAnswerId == t.TopicAnswerID
+                                                select new {
+                                                    TopicAnswerID = c.TopicAnswerId,
+                                                    TopicID = c.TopicId,
+                                                    AnswerLikes = c.AnswerLikes,
+                                                    Content = c.AnswerContent,
+                                                    UserID = c.UserId,
+                                                    UploadTime = c.AnswerUploadTime,
+                                                    ParentAnswerID = c.ParentAnswerId
+                                                });
+                    foreach (var tt in allSecondLevelAnswer.ToList()) {
+                        var answerUser2 = (from c in entity.User
+                                          where c.UserId == tt.UserID
+                                          select new {
+                                               userID = c.UserId,
+                                               nickName = c.NickName,
+                                               avatr = c.Avatr,
+                                               gender = c.Gender
+                                           }).FirstOrDefault();
+                        var aa = new { userComment = JsonConvert.SerializeObject(tt),
+                                       userInfo = JsonConvert.SerializeObject(answerUser2) };
+                        a.userComments.Add(JsonConvert.SerializeObject(aa) );
+                    }
+                    answerUserList.Add(JsonConvert.SerializeObject(a) );
+                }
+                flag = 1;
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+            var returnJson = new { answerUserList = answerUserList,
+                                   flag = flag};
+
+            return Json(returnJson);
+        }
+
     }
 }
