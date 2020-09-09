@@ -1194,5 +1194,35 @@
             }
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.TopicController.getUserTopicNum(System.String)">
+            <summary>
+            返回用户发表的所有话题数量
+            </summary>
+            <param name="userID"></param>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1,
+              topicCount = 1,
+              
+              失败：flag = 0
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getAnswerNumOfUser(System.String)">
+            <summary>
+            返回用户获得的所有回答数量
+            </summary>
+            <param name="userID"></param>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1,
+              userTopicAnswerCount = 1,
+              
+              失败：flag = 0
+            }
+            </remarks>
+        </member>
     </members>
 </doc>
