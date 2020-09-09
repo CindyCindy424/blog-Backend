@@ -14,7 +14,7 @@ using Temperature.Models;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Temperature.Controllers {
-    [Authorize]
+    //[Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class PhotoController : Controller {
@@ -30,7 +30,13 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法创建，出现错误/异常</response>
         /// <returns></returns>
-        [HttpPost]
+        /// <remarks>
+        /// return {
+        ///  "createAlbumFlag": 1,
+        ///  "albumID": "2"
+        /// }
+        /// </remarks>
+    [HttpPost]
         public ActionResult createAlbumByID(string albumIntro, string albumName, string userID) {
             DateTime dateTime = DateTime.Now; //创建当前时间
             int createAlbumFlag = 0;
@@ -67,6 +73,14 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法新建记录，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// "createAlbumHistoryFlag": 1
+        /// 失败：
+        /// "createAlbumHistoryFlag": 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult createAlbumHistoryByID(string albumID, string userID) {
             AlbumVisit albumVisit = new AlbumVisit();
@@ -98,7 +112,18 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法新建图片，出现错误/异常</response>
         /// <returns></returns>
-        [HttpPost]
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// "Flag": 1
+        ///"uploadPaths": "[\"albums\3\2\413127ac-77f4-474f-8b3f-8561dc7c5d21_矢量日本特色文化集合元素.png\"]", //静态资源路径
+        ///"coorespondingPhotoIDs": "[\"2\"]", //上传图片所获得的photoID 按照上传顺序排列
+        ///
+        /// 失败：
+        /// "Flag": 0
+        /// }
+        /// </remarks>
+    [HttpPost]
         public ActionResult createPhotoByID(IFormFileCollection uploadedPhoto, string albumID, string userID) {
             DateTime dateTime = DateTime.Now;
             int createPhotoFlag = 0;
@@ -159,6 +184,16 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法评论图片，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// "Flag": 1
+        /// "photoCommentByID": "1", 、图片评论id
+        /// 
+        /// 失败：
+        /// "Flag": 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult createPhotoCommentByID(string content, string photoID, string userID) {
             DateTime dateTime = DateTime.Now;
@@ -224,6 +259,15 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法删除历史，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult deleteAlbumHistoryByID(string albumID, string userID) {
             int deleteAlbumHistoryFlag = 0;
@@ -248,6 +292,15 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法删除，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult deletePhotoByID(string photoID) {
             int deletePhotoFlag = 0;
@@ -275,7 +328,16 @@ namespace Temperature.Controllers {
         /// <param name="commentID"></param>
         /// <response code="200">成功</response>
         /// <response code="403">无法删除，出现错误/异常</response>
-        /// <returns>123</returns>
+        /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult deletePhotoCommentByID(string commentID) {
             int deletePhotoCommentFlag = 0;
@@ -300,6 +362,16 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "albumVisits": "[{\"visitor\":\"www\",\"visitTime\":\"2020/9/9 11:38:01\"}]",
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult getAlbumHistryByID(string albumID) {
             int getAlbumHistryFlag = 0;
@@ -337,6 +409,18 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "albums": "[{\"AlbumId\":1,\"AlbumIntroduction\":\"1\",\"AlbumName\":\"22\",\"AlbumTime\":\"2020-09-07T16:12:53\",\"UserId\":3,\"User\":null,\"AlbumVisit\":[],\"Photo\":[]},
+        /// {\"AlbumId\":2,\"AlbumIntroduction\":\"new album\",\"AlbumName\":\"hello album\",\"AlbumTime\":\"2020-09-09T11:36:01\",\"UserId\":3,\"User\":null,\"AlbumVisit\":[],\"Photo\":[]}]",
+        /// {......}
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult getAllAlbumByID(string userID) {
             int getAllAlbumFlag = 0;
@@ -367,6 +451,17 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "photos": "[{\"PhotoId\":2,\"AlbumId\":2,\"PhotoLikes\":0,\"VisitNum\":0,\"PhotoAddress\":\"albums\3\2\413127ac-77f4-474f-8b3f-8561dc7c5d21_矢量日本特色文化集合元素.png\",\"PhotoUploadTime\":\"2020-09-09T11:41:36\",\"UserId\":3,\"Album\":null,\"User\":null,\"PhotoComment\":[],\"PhotoVisit\":[]},
+        /// {......}]",
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult getAllPhotoByID(string albumID, string userID) {
             DateTime dateTime = DateTime.Now;
@@ -401,6 +496,16 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="photoID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "photo": {\"PhotoId\":2,\"AlbumId\":2,\"PhotoLikes\":0,\"VisitNum\":0,\"PhotoAddress\":\"albums\3\2\413127ac-77f4-474f-8b3f-8561dc7c5d21_矢量日本特色文化集合元素.png\",\"PhotoUploadTime\":\"2020-09-09T11:41:36\",\"UserId\":3,\"Album\":null,\"User\":null,\"PhotoComment\":[],\"PhotoVisit\":[]}
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult increasePhotoVisit(string photoID) {
             int flag = 0;
@@ -429,6 +534,16 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "photoComments": "[{\"PhotoCommentId\":1,\"PhotoCommentContent\":\"这张图片真好看\",\"PhotoId\":2,\"UserId\":3,\"PhotoCommentTime\":\"2020-09-09T11:46:37\",\"Photo\":null,\"User\":null}]",
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult getPhotoCommentByID(string photoID) {
             int getPhotoCommentFlag = 0;
@@ -458,6 +573,16 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "photoVisits": "[]",
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult getPhotoHistoryByID(string photoID) {
             int getPhotoHistryFlag = 0;
@@ -496,6 +621,17 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法更新点赞，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        /// 成功：
+        /// flag = 1
+        /// "photoID": "2",
+        /// "photoLikes": 1, //点赞数量
+        /// 
+        /// 失败：
+        /// flag = 0
+        /// }
+        /// </remarks>
         [HttpGet]
         public ActionResult setPhotoLike(string photoID) {
             int setPhotoLikeFlag = 0;

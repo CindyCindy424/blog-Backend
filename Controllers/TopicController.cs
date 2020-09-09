@@ -27,6 +27,12 @@ namespace Temperature.Controllers {
         /// <param name="topicID"></param>
         /// <param name="userID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public ActionResult createTopicAnswerByID(string content, string topicID, string userID, string parentID = "-1") {
             DateTime dateTime = DateTime.Now; //获取当前时间
@@ -70,6 +76,12 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法创建</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [SwaggerResponse(200, "文档注释", typeof(Json))]
         [HttpPost]
         public ActionResult createTopicByID(string content, string title, string userID, string zoneID) {
@@ -105,6 +117,12 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法删除，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [SwaggerResponse(200, "文档注释")]
         [HttpPost]
         public ActionResult deleteTopicAnswerByID(string answerID) {
@@ -135,6 +153,13 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法删除，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///         topicID : topidID
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult deleteTopicByID(string topicID) {
             int deleteTopicFlag = 0;
@@ -168,6 +193,16 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   Result : [
+        ///     {topicID:, topicContent:, answerNum:, userID:, topicUpdateTime:, zoneID:},
+        ///     {......}
+        /// ]
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [SwaggerResponse(200, "文档注释", typeof(Topic))]
         [HttpPost]
         public JsonResult getTopicByPage(int pageNum, int pageSize, string zoneID) {
@@ -200,6 +235,15 @@ namespace Temperature.Controllers {
         /// <response code="200">成功</response>
         /// <response code="403">无法获取，出现错误/异常</response>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   Result:{
+        ///       {topicAnswerID:, topicID:, answerLikes:, answerContent:, userID:, answerUploadTime:, parentAnswerID:}
+        /// }
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getTopicCommentByID(string topicID) {
             int getTopicCommentFlag = 0;
@@ -228,6 +272,13 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="zoneID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   totalNumber: ,
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getTopicNumberByZoneID(string zoneID) {
             int getTopicNumberFlag = 0;
@@ -250,6 +301,14 @@ namespace Temperature.Controllers {
         /// 获取最新发布的topic
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   topics:{
+        ///       {topicAnswerID:, topicID:, answerLikes:, answerContent:, userID:, answerUploadTime:, parentAnswerID:}
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getNewestTopic(int takeTopicNum) {
             int flag = 0;
@@ -274,6 +333,14 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="takeTopicNum"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   topics:{
+        ///       {topicAnswerID:, topicID:, answerLikes:, answerContent:, userID:, answerUploadTime:, parentAnswerID:}
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getHotestTopic(int takeTopicNum) {
             int flag = 0;
@@ -299,6 +366,16 @@ namespace Temperature.Controllers {
         /// </summary>
         /// <param name="topicID"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   answerUserList: [
+        ///   {"topicInfo":"{"TopicAnswerID":1,"TopicID":3,"AnswerLikes":2,"Content":"hello","UserID":3,"UploadTime":"2020-09-09T11:28:07","ParentAnswerID":-1}","userComments":[]},
+        ///   {......},
+        ///     ],
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
         [HttpPost]
         public JsonResult getTopicDetailByID(string topicID) {
             int flag = 0;
