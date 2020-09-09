@@ -170,6 +170,12 @@ namespace Temperature.Controllers {
                 entity.Topic.Remove(topic);
                 entity.SaveChanges();
 
+                //更新分区topic数量
+                var zone = entity.Zone.Single(c => c.ZoneId == topic.ZoneId);
+                zone.ZoneTopicNum -= 1;
+                entity.Zone.Update(zone);
+                entity.SaveChanges();
+
                 returnJson.Add("deleteTopic", topic.TopicId.ToString());
             } catch (Exception e) {
                 deleteTopicFlag = 0; //失败
@@ -436,6 +442,83 @@ namespace Temperature.Controllers {
             var returnJson = new { answerUserList = answerUserList,
                                    flag = flag};
 
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 返回用户发表的所有话题数量
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1,
+        ///   topicCount = 1,
+        ///   
+        ///   失败：flag = 0
+        /// }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserTopicNum(string userID) {
+            int flag = 0;
+            int count = -1;
+
+            try {
+                count = (from r in entity.Topic
+                         where r.UserId == int.Parse(userID)
+                         select r).Count();
+                flag = 1;
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            var returnJson = new {
+                topicCount = count,
+                flag = flag
+            };
+
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 返回用户获得的所有回答数量
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1,
+        ///   userTopicAnswerCount = 1,
+        ///   
+        ///   失败：flag = 0
+        /// }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getAnswerNumOfUser(string userID) {
+            int flag = 0;
+            int count = -1;
+
+            try {
+                var content = (from r in entity.Topic
+                               where r.UserId == int.Parse(userID)
+                               select r);
+
+                count = 0;
+                foreach(var t in content) {
+                    count += (int)t.AnswerNum;
+                }
+
+                flag = 1;
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            var returnJson = new { 
+                userTopicAnswerCount = count,
+                flag = flag
+            };
             return Json(returnJson);
         }
 
