@@ -53,24 +53,29 @@ namespace Temperature.Controllers
             //验证通过 否则 返回Unauthorized
 
             //创建claim
-            var authClaims = new[] {
-                new Claim(JwtRegisteredClaimNames.Sub,Username),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
-            };
-            IdentityModelEventSource.ShowPII = true;
-            //签名秘钥 可以放到json文件中
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecureKeySecureKeySecureKeySecureKeySecureKeySecureKey"));
+            try {
+                var authClaims = new[] {
+                    new Claim(JwtRegisteredClaimNames.Sub,Username),
+                    new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
+                };
+                IdentityModelEventSource.ShowPII = true;
+                //签名秘钥 可以放到json文件中
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecureKeySecureKeySecureKeySecureKeySecureKeySecureKey"));
 
-            var token = new JwtSecurityToken(
-                   issuer: "https://www.cnblogs.com/chengtian",
-                   audience: "https://www.cnblogs.com/chengtian",
-                   expires: DateTime.Now.AddHours(2),
-                   claims: authClaims,
-                   signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-                   );
+                var token = new JwtSecurityToken(
+                    issuer: "https://www.cnblogs.com/chengtian",
+                    audience: "https://www.cnblogs.com/chengtian",
+                    expires: DateTime.Now.AddHours(2),
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                    );
 
-            //返回token和过期时间
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                //返回token和过期时间
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            } catch(Exception e) {
+                Console.log(e,Message);
+                return "";
+            }
         }
 
         /// <summary>
@@ -99,67 +104,49 @@ namespace Temperature.Controllers
         [HttpPost]
         //[SwaggerResponse(0, "文档注释", typeof(User))]
         //[SwaggerResponse(0, "文档注释",typeof(User))]
-        public ActionResult Login(string nick_name, string password)
-        {
-            
+        public ActionResult Login(string nick_name, string password) {
             User user = new User();
             string token = "";
             int flag = 0;
+            int id = -1;
             //JsonData jsondata = new JsonData();  //json格式的数据
-            var userid =    //EF中的Linq语法
-                        (from u in entity.User
-                         where u.NickName == nick_name
-                         select u.UserId).Distinct(); //与sql中的select distinct类同
-            var id = userid.FirstOrDefault();
-            if (userid.FirstOrDefault() != default)
-            {
-                //var id = userid.FirstOrDefault();
-                user = entity.User.Find(id);  //根据主键id找
-                if (user.Password != password)
-                {
-                    flag = 2;//密码错误
+            try {
+                var userid =    //EF中的Linq语法
+                            (from u in entity.User
+                             where u.NickName == nick_name
+                             select u.UserId).Distinct(); //与sql中的select distinct类同
+                id = userid.FirstOrDefault();
+                if (userid.FirstOrDefault() != default) {
+                    //var id = userid.FirstOrDefault();
+                    user = entity.User.Find(id);  //根据主键id找
+                    if (user.Password != password) {
+                        flag = 2;//密码错误
+                    }
+                    else {
+                        //jsondata["userID"] = id;
+                        flag = 0;//成功
+
+                        token = getToken(nick_name);
+                    }
                 }
-                else
-                {
-                    //jsondata["userID"] = id;
-                    flag = 1;//成功
-                    token = getToken(nick_name);
+                else {
+                    flag = 1;//用户名不存在
                 }
             }
-            else
-            {
-                flag = 3;//用户名不存在
+            catch (Exception e) {
+                flag = 0;
             }
-            /*var data = new
-            {
+            var data = new {
                 userid = id,
-                loginFlag = flag
-            };*/
+                loginFlag = flag,
+                token = token
+            };
 
             //jsondata["LoginFlag"] = flag.ToString();
             //var data = Json(jsondata.ToJson());
             //return Ok(data);
             //return Ok(Json(jsondata.ToJson()));
-            /*
-            if (flag == 0)
-            {
-                Response.StatusCode = 200;//成功
-            }
-            else if (flag == 1)
-            {
-                Response.StatusCode = 404;//用户名不存在
-            }
-            else
-            {
-                Response.StatusCode = 403;//密码错误
-            }*/
             //return Ok(data);
-            var data = new
-            {
-                userid = id,
-                loginFlag = flag,
-                token = token
-            };
             return Json(data);
 
         }
