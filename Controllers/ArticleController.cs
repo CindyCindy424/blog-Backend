@@ -70,7 +70,8 @@ namespace Temperature.Controllers
                 flag = 3;//该用户已存在同名文章
                 return Json(new { ReturnFlag = flag, UserName = nick_name, Article_Name = title, result = "Already Exists!" });
             }
-
+            try
+            {
             //Zone里面更新文章数量
             var zone = entity.Zone.Find(zoneid);
             var num = zone.ZoneArticleNum;
@@ -93,9 +94,13 @@ namespace Temperature.Controllers
             article.ArticleContent = content;
             entity.Article.Add(article);
             entity.SaveChanges();
-
-            //Response.StatusCode = 200;
             flag = 1;
+            }catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+            //Response.StatusCode = 200;
             return Json(new { ReturnFlag = flag, user = nick_name, article = title });
         }
 
@@ -149,6 +154,9 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, article = title, result = "Article NOT FOUND" });
             }
 
+            try
+            {
+             
             //ARTICLE表更新评论
             // var article = entity.Article.Find(A_id);
             //article.ArticleCommentReply = articlecommentID;          
@@ -167,7 +175,15 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;//成功
             flag = 1;
-            return Json(new { ReturnFlag = flag, articleID = A_id, articlecomment = content });
+             
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+           return Json(new { ReturnFlag = flag, articleID = A_id, articlecomment = content });
+           
         }
 
         /// <summary>
@@ -195,6 +211,7 @@ namespace Temperature.Controllers
         {
             //根据用户名找到用户ID
             var flag = 0;
+           
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -219,8 +236,10 @@ namespace Temperature.Controllers
                 flag = 3;
                 return Json(new { ReturnFlag = flag, ArticleID = A_id, result = "NOT FOUND" });
             }
+ try
+            {
 
-            //修改Article表
+//修改Article表
             var article = entity.Article.Find(A_id);
             article.ReadNum++;
             entity.Entry(article).State = EntityState.Modified;
@@ -234,9 +253,17 @@ namespace Temperature.Controllers
             entity.ArticleVisit.Add(item);
             entity.SaveChanges();
 
-            var info = entity.Article.Find(A_id);
+           
             //Response.StatusCode = 200;//成功
             flag = 1;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+              var info = entity.Article.Find(A_id);
             return Json(new { ReturnFlag = flag, INFO = info });
         }
 
@@ -317,8 +344,9 @@ namespace Temperature.Controllers
                 entity.Entry(record).State = EntityState.Deleted;
                 entity.SaveChanges();
             }
-
-            //ArticleVisit删除
+            try
+            {
+           //ArticleVisit删除
             var A_V_record =
                 (from c in entity.ArticleVisit
                  where c.ArticleId == A_id
@@ -339,6 +367,15 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;
             flag = 1;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+
             return Json(new { ReturnFlag = flag, UserName = nick_name, ArticleName = title, result = "success!" });
         }
 
@@ -394,8 +431,9 @@ namespace Temperature.Controllers
             }
 
             // var article = entity.Article.Find(A_id);
-
-            var item = entity.ArticleCommentReply.Find(A_id);
+            try
+            {
+           var item = entity.ArticleCommentReply.Find(A_id);
             //if (item == default)
             //{
             //    Response.StatusCode = 406;//文章无该评论
@@ -413,6 +451,13 @@ namespace Temperature.Controllers
 
             // Response.StatusCode = 200;
             flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
             return Json(new { ReturnFlag = flag, result = "successful deleted" });
         }
 
@@ -441,6 +486,7 @@ namespace Temperature.Controllers
         {
             var flag = 0;
             //根据用户名找到用户ID
+        
             var userid =
                     (from c in entity.User
                      where c.NickName == nick_name
@@ -465,7 +511,7 @@ namespace Temperature.Controllers
                 flag = 3;
                 return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
-
+           
             var item =
                 (from u in entity.ArticleCommentReply
                  where u.ArticleId == A_id
@@ -473,6 +519,8 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;//成功
             flag = 1;
+          
+
             return Json(new { ReturnFlag = flag, Item = item });
 
         }
@@ -541,7 +589,9 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, VID = V_id, result = "NOT FOUND" });
             }
 
-            var item = entity.ArticleVisit.Find(id, A_id);
+            try
+            {
+           var item = entity.ArticleVisit.Find(id, A_id);
 
             //ARTICLEVISIT表中删除
             entity.Entry(item).State = EntityState.Deleted;
@@ -549,6 +599,13 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;
             flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
             return Json(new { ReturnFlag = flag, result = "successful deleted" });
 
         }
@@ -731,7 +788,9 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
-            var info = entity.Article.Find(A_id);
+            try
+            {
+           var info = entity.Article.Find(A_id);
             info.Title = newName;
             info.ArticleContent = newContent;
             entity.Entry(info).State = EntityState.Modified;
@@ -739,6 +798,13 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;//成功
             flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
             return Json(new { ReturnFlag = flag, UserName = nick_name, OldName = title, NewName = newName, NewContent = newContent });
         }
 
@@ -806,7 +872,8 @@ namespace Temperature.Controllers
                 flag = 3;
                 return Json(new { ReturnFlag = flag, crID = cr_id, result = "NOT FOUND" });
             }
-
+            try
+            {
             var info = entity.ArticleCommentReply.Find(cr_id);
             info.ArticleCrContent = newContent;
             entity.Entry(info).State = EntityState.Modified;
@@ -815,6 +882,13 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;//成功
             flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
             return Json(new { ReturnFlag = flag, UserName = nick_name, crID = articlecrid, NewContent = newContent });
         }
 
@@ -874,8 +948,9 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, aclid = articlecommentID1, result = " NOT FOUND" });
             }
 
-
-            //加入ARTICLE_COMMENT_REPLY表
+            try
+            {
+ //加入ARTICLE_COMMENT_REPLY表
             var item = new ArticleCommentReply();
             // item.ArticleCrId = articlecommentID2;
             item.ArticleId = A_id;
@@ -888,6 +963,13 @@ namespace Temperature.Controllers
 
             //Response.StatusCode = 200;//成功
             flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
             return Json(new { ReturnFlag = flag, articleID = A_id, articlecomment = content });
         }
 
@@ -928,7 +1010,13 @@ namespace Temperature.Controllers
             }
             return Json(returnJson);
         }
-
+        /// <summary>
+        /// 分页获取按阅读量排名的article
+        /// </summary>
+        /// <param name="pageNum"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="zoneID"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult getArticleByNum(int pageNum, int pageSize, string zoneID)
         {
