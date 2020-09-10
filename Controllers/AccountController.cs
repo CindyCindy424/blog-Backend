@@ -305,6 +305,98 @@ namespace Temperature.Controllers
 
         }
 
+        /// <summary>
+        /// 修改用户名
+        /// </summary>
+        /// <param name="oldName">原用户名</param>
+        /// <param name="newName">新用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///      { ModifyFlag = flag }
+        ///      
+        ///      flag:
+        ///     0:未修改
+        ///     1：成功
+        ///     2：没有找到该用户
+        /// </remarks>
+        /// 
+        [HttpPost]
+        public JsonResult nameModify(string oldName,string newName)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == oldName
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+            }
+            else
+            {
+                user.NickName = newName;
+                entity.Entry(user).State = EntityState.Modified;
+                entity.SaveChanges();
+                flag = 1; //修改完成
+            }
+
+            return Json(new { ModifyFlag = flag });
+        }
+
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <param name="oldPW">旧密码</param>
+        /// <param name="newPW">新密码</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     { ModifyFlag = flag }
+        ///     
+        ///     flag:
+        ///     0:未修改
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：旧密码输入不正确
+        /// </remarks>
+        /// 
+        [HttpPost]
+        public JsonResult passwordModify(string nick_name,string oldPW,string newPW)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+            }
+            else
+            {
+                if(user.Password != oldPW)
+                {
+                    flag = 3;//旧密码输入不正确
+                }
+                else
+                {
+                    user.Password = newPW;
+                    entity.Entry(user).State = EntityState.Modified;
+                    entity.SaveChanges();
+                    flag = 1;
+                }
+            }
+            return Json(new { ModifyFlag = flag });
+        }
+
 
         /// <summary>
         /// 维护个人信息（不含头像维护）
