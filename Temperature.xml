@@ -291,7 +291,7 @@
                     返回：{ returnFlag = flag }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String)">
+        <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
             创建文章名为nick_name用户创建一篇题目为title内容为content的文章
             </summary>
@@ -321,10 +321,9 @@
             </summary>
             <param name="nick_name"></param>
             <param name="title"></param>
-            <param name="content"></param>
+            <param name="articlecommentID"></param>
             <returns></returns>
             <remarks>
-            
                 返回内容：
                 {
                         ReturnFlag = flag,
@@ -337,7 +336,6 @@
                 1：成功
                 2：没有找到该用户
                 3：没找到该文章
-                
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.getArticleInfoByTitle(System.String,System.String)">
@@ -371,7 +369,6 @@
             <param name="title"></param>
             <returns></returns>
             <remarks>
-            
                 返回内容：
                 {
                        eturnFlag = flag,
@@ -385,33 +382,9 @@
                 1：成功
                 2：没有找到该用户
                 3：没找到该文章
-                
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.deleteArticleCommentByID(System.String,System.Int32)">
-            <summary>
-            删除评论名为nick_name用户删除自己的id为articlecommentID的评论
-            </summary>
-            <param name="nick_name"></param>
-            <param name="title"></param>
-            <param name="articlecommentID"></param>
-            <returns></returns>
-            <remarks>
-            
-                返回内容：
-                {
-                      ReturnFlag = flag, 
-                      result = "successful deleted"
-                }
-                
-                flag:
-                0：未操作
-                1：成功
-                2：没有找到该用户
-                3：没找到该用户评论
-                
-            </remarks>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.deleteArticleCommentByID(System.String,System.Int32)" -->
         <member name="M:Temperature.Controllers.ArticleController.getArticleCommentByTitle(System.String,System.String)">
             <summary>
             查看文章评论
@@ -577,6 +550,15 @@
                 2：没有找到该用户
                 3：没找到要评论的评论
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getArticleByPage(System.Int32,System.Int32,System.String)">
+            <summary>
+            分页获取zone的article
+            </summary>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="zoneID"></param>
+            <returns></returns>
         </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>
@@ -1209,6 +1191,36 @@
               {......},
                 ],
               失败：flag = 2
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getUserTopicNum(System.String)">
+            <summary>
+            返回用户发表的所有话题数量
+            </summary>
+            <param name="userID"></param>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1,
+              topicCount = 1,
+              
+              失败：flag = 0
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getAnswerNumOfUser(System.String)">
+            <summary>
+            返回用户获得的所有回答数量
+            </summary>
+            <param name="userID"></param>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1,
+              userTopicAnswerCount = 1,
+              
+              失败：flag = 0
             }
             </remarks>
         </member>

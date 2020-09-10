@@ -15,3 +15,6 @@
 
 4. 0909 部署v1：
 	1）修改PhotoController
+
+5. 0909 部署v2：
+	2）修改TopicController
