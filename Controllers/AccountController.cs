@@ -128,13 +128,14 @@ namespace Temperature.Controllers
                     }
                     else {
                         //jsondata["userID"] = id;
-                        flag = 0;//成功
+                        
 
                         token = getToken(nick_name);
+                        flag = 1;//成功
                     }
                 }
                 else {
-                    flag = 1;//用户名不存在
+                    flag = 3;//用户名不存在
                 }
             }
             catch (Exception e) {
