@@ -47,7 +47,7 @@ namespace Temperature.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySQL("server=cdb-fmybdjyc.cd.tencentcdb.com;port=10118;user=root;password=esgzhuanyeshixi2020;database=blog;pooling=true;connection lifetime=0;min pool size = 10;max pool size=512");
+                optionsBuilder.UseMySQL("server=cdb-fmybdjyc.cd.tencentcdb.com;port=10118;user=root;password=esgzhuanyeshixi2020;database=blog;Pooling=true;Connection lifetime=0;Min pool size = 10;Max pool size=512");
             }
         }
 

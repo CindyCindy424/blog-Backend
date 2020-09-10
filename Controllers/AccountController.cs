@@ -72,8 +72,10 @@ namespace Temperature.Controllers
 
                 //返回token和过期时间
                 return new JwtSecurityTokenHandler().WriteToken(token);
-            } catch(Exception e) {
-                Console.log(e,Message);
+            } 
+            catch(Exception e) 
+            {
+                Console.WriteLine(e.Message);
                 return "" ;
             }
         }
@@ -90,7 +92,8 @@ namespace Temperature.Controllers
         ///     {
         ///         userid = id,
         ///         loginFlag = flag, 
-        ///         token = token
+        ///         token = token,
+        ///         Msg = msg
         ///     }
         ///     
         ///     flag：
@@ -107,6 +110,7 @@ namespace Temperature.Controllers
         public ActionResult Login(string nick_name, string password) {
             User user = new User();
             string token = "";
+            string msg = "";
             int flag = 0;
             int id = -1;
             //JsonData jsondata = new JsonData();  //json格式的数据
@@ -135,11 +139,13 @@ namespace Temperature.Controllers
             }
             catch (Exception e) {
                 flag = 0;
+                msg = e.Message;
             }
             var data = new {
                 userid = id,
                 loginFlag = flag,
-                token = token
+                token = token,
+                Msg = msg
             };
 
             //jsondata["LoginFlag"] = flag.ToString();

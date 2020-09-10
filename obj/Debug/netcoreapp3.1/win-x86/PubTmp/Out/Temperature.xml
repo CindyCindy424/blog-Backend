@@ -17,7 +17,8 @@
                  {
                      userid = id,
                      loginFlag = flag, 
-                     token = token
+                     token = token,
+                     Msg = msg
                  }
                  
                  flag：
@@ -60,6 +61,44 @@
                 1：注册成功
                 2：用户名已经被占用
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.nameModify(System.String,System.String)">
+            <summary>
+            修改用户名
+            </summary>
+            <param name="oldName">原用户名</param>
+            <param name="newName">新用户名</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                 { ModifyFlag = flag }
+                 
+                 flag:
+                0:未修改
+                1：成功
+                2：没有找到该用户
+            </remarks>
+            
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.passwordModify(System.String,System.String,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="nick_name">用户名</param>
+            <param name="oldPW">旧密码</param>
+            <param name="newPW">新密码</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                { ModifyFlag = flag }
+                
+                flag:
+                0:未修改
+                1：成功
+                2：没有找到该用户
+                3：旧密码输入不正确
+            </remarks>
+            
         </member>
         <member name="M:Temperature.Controllers.AccountController.personalInfo(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
             <summary>
