@@ -300,6 +300,61 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
+        /// 检查密码正确性
+        /// </summary>
+        /// <param name="nick_name"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag=0; 未操作
+        ///     
+        ///     flag =1:成功
+        ///     
+        ///         返回：{ Result = "true", Flag = flag }
+        ///         
+        ///     flag = 2:没有找到该用户
+        ///     
+        ///         返回：{ Flag = flag }
+        ///         
+        ///     flag = 3：密码不正确
+        ///     
+        ///         返回：{ Result = "false", Flag = flag }
+        ///         
+        /// </remarks>
+        [HttpPost]
+        public JsonResult checkPW(string nick_name, string password)
+        {
+            int flag = 0;
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+                return Json(new { Flag = flag });
+            }
+            else
+            {
+                if(user.Password != password)
+                {
+                    flag = 3;//密码不正确
+                    return Json(new { Result = "false", Flag = flag });
+                }
+                else
+                {
+                    flag = 1;//正确
+                    return Json(new { Result = "true", Flag = flag });
+                }
+            }
+        }
+
+        /// <summary>
         /// 修改用户名
         /// </summary>
         /// <param name="oldName">原用户名</param>
@@ -929,7 +984,42 @@ namespace Temperature.Controllers
         }
 
 
-
+        /// <summary>
+        /// 查询用户所有基本信息 【BY ID】
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///         uploadFlag = flag,
+        ///         userInfo = user
+        ///     }
+        ///     flag:
+        ///     0: 未执行
+        ///     1：成功
+        ///     2：没有找到该用户
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserInfoByID(int user_id)
+        {
+            int flag = 0;
+            /*var userid =
+                    (from c in entity.User
+                     where c.UserId == user_id
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                flag = 2; //没有找到该用户
+                //Response.StatusCode = 404;//没有该用户
+                return Json(new { UploadFlag = flag });
+            }*/
+            var user = entity.User.Find(user_id); //在数据库中根据key找到相应记录
+            flag = 1;//找到该用户
+                     // Response.StatusCode = 200;//成功
+            return Json(new { uploadFlag = flag, userInfo = user });
+        }
 
 
 

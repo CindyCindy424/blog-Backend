@@ -62,6 +62,32 @@
                 2：用户名已经被占用
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.checkPW(System.String,System.String)">
+            <summary>
+            检查密码正确性
+            </summary>
+            <param name="nick_name"></param>
+            <param name="password"></param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag=0; 未操作
+                
+                flag =1:成功
+                
+                    返回：{ Result = "true", Flag = flag }
+                    
+                flag = 2:没有找到该用户
+                
+                    返回：{ Flag = flag }
+                    
+                flag = 3：密码不正确
+                
+                    返回：{ Result = "false", Flag = flag }
+                    
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.AccountController.nameModify(System.String,System.String)">
             <summary>
             修改用户名
@@ -151,6 +177,24 @@
         <member name="M:Temperature.Controllers.AccountController.getUserInfoByNickName(System.String)">
             <summary>
             查询用户所有基本信息
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns></returns>
+            <remarks>
+                返回内容：
+                {
+                    uploadFlag = flag,
+                    userInfo = user
+                }
+                flag:
+                0: 未执行
+                1：成功
+                2：没有找到该用户
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserInfoByID(System.Int32)">
+            <summary>
+            查询用户所有基本信息 【BY ID】
             </summary>
             <param name="nick_name">用户名</param>
             <returns></returns>
