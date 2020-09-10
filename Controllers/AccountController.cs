@@ -74,7 +74,7 @@ namespace Temperature.Controllers
                 return new JwtSecurityTokenHandler().WriteToken(token);
             } catch(Exception e) {
                 Console.log(e,Message);
-                return "";
+                return "" ;
             }
         }
 
