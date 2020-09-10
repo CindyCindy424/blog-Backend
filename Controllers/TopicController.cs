@@ -522,5 +522,42 @@ namespace Temperature.Controllers {
             return Json(returnJson);
         }
 
+        /// <summary>
+        /// 返回某个topic的详情信息
+        /// </summary>
+        /// <param name="topicID"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// {
+        ///    "topicDetail": {
+        ///        "topicId": 2,
+        ///        "topicContent": "222222222222222222222222",
+        ///        "answerNum": 5,
+        ///        "userId": 2,
+        ///        "topicUploadTime": "2020-08-26T14:34:00",
+        ///        "zoneId": 3,
+        ///        "topicTitle": null,
+        ///        "user": null,
+        ///        "zone": null,
+        ///        "topicAnswerReply": [],
+        ///        "topicRank": []
+        ///    },
+        ///    "flag": 1
+        ///}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getSingleTopicDetail(string topicID) {
+            int flag = 0;
+            try {
+                var content = entity.Topic.Single(c => c.TopicId == int.Parse(topicID));
+                flag = 1;
+
+                return Json(new { topicDetail = content, flag = flag });
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+        }
     }
 }
