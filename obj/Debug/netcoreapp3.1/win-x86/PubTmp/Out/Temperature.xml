@@ -182,10 +182,17 @@
             <returns></returns>
             <remarks>
                 返回内容：
+                
                 {
+                
                     uploadFlag = flag,
+                    
+                    userAnnouncement = announcement,  //最新修改
+                    
                     userInfo = user
+                    
                 }
+                
                 flag:
                 0: 未执行
                 1：成功

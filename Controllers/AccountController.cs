@@ -953,10 +953,17 @@ namespace Temperature.Controllers
         /// <returns></returns>
         /// <remarks>
         ///     返回内容：
+        ///     
         ///     {
+        ///     
         ///         uploadFlag = flag,
+        ///         
+        ///         userAnnouncement = announcement,  //最新修改
+        ///         
         ///         userInfo = user
+        ///         
         ///     }
+        ///     
         ///     flag:
         ///     0: 未执行
         ///     1：成功
@@ -978,9 +985,15 @@ namespace Temperature.Controllers
                 return Json(new {  UploadFlag = flag });
             }
             var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+
+            var annoucement =
+                (from u in entity.Announcement
+                 where u.UserId == id
+                 select u.AnnouncementContent).Distinct().FirstOrDefault();
+
             flag = 1;//找到该用户
            // Response.StatusCode = 200;//成功
-            return Json(new { uploadFlag = flag, userInfo = user });
+            return Json(new { uploadFlag = flag, userAnnouncement = annoucement, userInfo = user });
         }
 
 
