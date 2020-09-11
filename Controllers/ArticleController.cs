@@ -19,15 +19,19 @@ namespace Temperature.Controllers
     [ApiController]
     //[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
 
-
+    [Area("PI")]
+    [Route("PI/[controller]/[action]")]
     public class ArticleController : Controller
     {
         private blogContext entity = new blogContext(); //整体数据库类型
         /// <summary>
+        /// 创建文章
         /// 创建文章名为nick_name用户创建一篇题目为title内容为content的文章
         /// </summary>
         /// <param name="nick_name"></param>
-        /// <param name="articleName"></param>
+        /// <param name="title"></param>
+        /// <param name="content"></param>
+        /// <param name="zoneid"></param>
         /// <returns></returns>
         /// <remarks>
         ///     返回内容：
@@ -100,13 +104,14 @@ namespace Temperature.Controllers
             return Json(new { ReturnFlag = flag, user = nick_name, article = title });
         }
 
+
         /// <summary>
         /// 新增文章评论
         /// 名为nick_name用户为一篇题目为title的文章写评论，内容为content
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
-        /// <param name="articlecommentID"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
         /// <remarks>
         ///     返回内容：
@@ -347,7 +352,6 @@ namespace Temperature.Controllers
         /// 删除评论
         /// 名为nick_name用户删除自己的id为articlecommentID的评论
         /// <param name="nick_name"></param>
-        /// <param name="title"></param>
         /// <param name="articlecommentID"></param>
         /// <returns></returns>
         /// <remarks>
@@ -427,7 +431,7 @@ namespace Temperature.Controllers
         ///     返回内容：
         ///     {
         ///           ReturnFlag = flag, 
-        ///           Item = item //内容里user_id 修改为 Nick_Name
+        ///           Item = item
         ///     }
         ///     
         ///     flag:
@@ -468,10 +472,8 @@ namespace Temperature.Controllers
 
             var item =
                 (from u in entity.ArticleCommentReply
-                            join right in entity.User
-                            on u.UserId equals right.UserId
                  where u.ArticleId == A_id
-                 select new { Article_cr_id = u.ArticleCrId,Article_cr_content = u.ArticleCrContent,Article_id = u.ArticleId,Nick_name = right.NickName,Article_cr_time = u.ArticleCrTime,Parent_cr_id = u.ParentCrId}).Distinct();
+                 select u).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;
@@ -745,6 +747,124 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
+        /// articlelikes加一
+        /// </summary>
+        /// <param name="nick_name"></param>
+        /// <param name="title"></param>
+        /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           result = "successful"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
+        [HttpPost]
+        public JsonResult addArticleLikeByTitle(string nick_name, string title)
+        {
+            var flag = 0;
+            //根据用户名找到用户ID
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
+            }
+
+            //找到文章
+            var articleid =
+                   (from c in entity.Article
+                    where (c.Title == title)
+                    select c.ArticleId).Distinct();
+            var A_id = articleid.FirstOrDefault();
+            if (A_id == default)
+            {
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
+            }
+
+            var info = entity.Article.Find(A_id);
+            info.ArticleLikes++;
+            entity.Entry(info).State = EntityState.Modified;
+            entity.SaveChanges();
+
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, result = "successful" });
+        }
+
+        /// <summary>
+        /// collectNum加1
+        /// </summary>
+        /// <param name="nick_name"></param>
+        /// <param name="title"></param>
+        /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///           ReturnFlag = flag, 
+        ///           result = "successful"
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：没有找到该用户
+        ///     3：没找到该文章
+        /// </remarks>
+        [HttpPost]
+        public JsonResult addArticleCollectByTitle(string nick_name, string title)
+        {
+            var flag = 0;
+            //根据用户名找到用户ID
+            var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
+            {
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
+            }
+
+            //找到文章
+            var articleid =
+                   (from c in entity.Article
+                    where (c.Title == title)
+                    select c.ArticleId).Distinct();
+            var A_id = articleid.FirstOrDefault();
+            if (A_id == default)
+            {
+                //Response.StatusCode = 404;//没找到该文章
+                flag = 3;
+                return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
+            }
+
+            var info = entity.Article.Find(A_id);
+            info.CollectNum++;
+            entity.Entry(info).State = EntityState.Modified;
+            entity.SaveChanges();
+
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, result = "successful" });
+        }
+
+        /// <summary>
         /// 更新评论
         /// 名为nick_name用户更新id为articlecrid的评论的内容
         /// </summary>
@@ -826,7 +946,6 @@ namespace Temperature.Controllers
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="articlecommentID1"></param>
-        /// <param name="articlecommentID2"></param>
         /// <param name="content"></param>
         /// <returns></returns>
         /// <remarks>
@@ -900,6 +1019,18 @@ namespace Temperature.Controllers
         /// <param name="pageSize"></param>
         /// <param name="zoneID"></param>
         /// <returns></returns>
+        ///<remarks>
+        ///     返回内容：
+        ///     {
+        ///          getFlag = getArticleFlag, 
+        ///          
+        ///           result = contentJson
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        /// </remarks>
         //[SwaggerResponse(200, "文档注释", typeof(Topic))]
         [HttpPost]
         public JsonResult getArticleByPage(int pageNum, int pageSize, string zoneID)
@@ -926,7 +1057,55 @@ namespace Temperature.Controllers
             }
             finally
             {
-                returnJson.Add("getTopicFlag", getArticleFlag.ToString());
+                returnJson.Add("getFlag", getArticleFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 分页获取user的article
+        /// </summary>
+        /// <param name="pageNum"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="userid"></param>
+        /// <returns></returns>
+        /// remarks>
+        ///     返回内容：
+        ///     {
+        ///          getFlag = getFlag,        
+        ///           result = contentJson
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserArticlebypage(int pageNum, int pageSize, string userid)
+        {
+            int getFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try
+            {
+                var content = (from c in entity.Article
+                               where c.UserId == int.Parse(userid)
+                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+
+                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                returnJson["Result"] = contentJson;
+                getFlag = 1;
+
+            }
+            catch (Exception e)
+            {
+                getFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getFlag", getFlag.ToString());
             }
             return Json(returnJson);
         }
@@ -937,6 +1116,18 @@ namespace Temperature.Controllers
         /// </summary>
         /// <param name="takeArticleNum"></param>
         /// <returns></returns>
+        /// <remarks>
+        ///     返回内容：
+        ///     {
+        ///          flag = flag, 
+        ///          
+        ///          articless = content
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        /// </remarks>
         [HttpPost]
         public JsonResult getArticlebyreadnum(int takeArticleNum)
         {
@@ -959,12 +1150,25 @@ namespace Temperature.Controllers
             returnJson.Add("flag", flag.ToString());
             return Json(returnJson);
         }
-
+        /*
         /// <summary>
         /// 获取最新评论
+        /// 根据articleID获取本文章最新评论
         /// </summary>
         /// <param name="articleid"></param>
         /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///          flag = flag, 
+        ///          
+        ///         comment = content
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        /// </remarks>
         [HttpPost]
         public JsonResult getNewestcomment(int articleid)
         {
@@ -991,50 +1195,66 @@ namespace Temperature.Controllers
             returnJson.Add("flag", flag.ToString());
             return Json(returnJson);
         }
+        */
 
         /// <summary>
-        /// 分页返回所有文章——按照（浏览量+点赞量）从大到小的顺序
+        /// 获取一个用户所有文章的最新评论
         /// </summary>
-        /// <param name="pageNum">页号</param>
-        /// <param name="pageSize">一页大小</param>
+        /// <param name="takeCommentNum"></param>
+        /// <param name="nick_name"></param>
         /// <returns></returns>
-        /// <remarks>
-        ///     flag:
-        ///     0:未操作
-        ///     1：成功
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///          flag = flag, 
+        ///          
+        ///         comment = content
+        ///     }
         ///     
-        ///     返回：{Result = content,getArticleFlag = flag}
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        ///     2：找不到用户
         /// </remarks>
         [HttpPost]
-        public JsonResult getRecommandedArticle(int pageNum, int pageSize)
+        public JsonResult getNewestComment(int takeCommentNum,string nick_name)
         {
-            int getArticleFlag = 0;
+            int flag = 0;
             Dictionary<string, string> returnJson = new Dictionary<string, string>();
-            returnJson.Add("Result", "");
-
-            try
+            //找用户
+            var userid =
+        (from c in entity.User
+         where c.NickName == nick_name
+         select c.UserId).Distinct();
+            var id = userid.FirstOrDefault();
+            if (id == default)
             {
-                var content = (from c in entity.Article
-                               orderby ( c.ReadNum +c.ArticleLikes ) descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
-                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
-
-                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
-                returnJson["Result"] = contentJson;
-                getArticleFlag = 1;
-
+                //Response.StatusCode = 405;//没找到该用户
+                flag = 2;
+                return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
+            }
+            try
+            {    
+             var content =
+                (from c in entity.ArticleCommentReply join right in entity.Article 
+                 on c.ArticleId equals right.ArticleId
+                 where (right.UserId==id)
+                 orderby c.ArticleCrTime descending
+                 select c).Take(takeCommentNum);
+             //   var content = entity.ArticleCommentReply.OrderByDescending(c => c.TopicUploadTime).Take(takeTopicNum);
+                returnJson.Add("comments", JsonConvert.SerializeObject(content));
+                flag = 1;
             }
             catch (Exception e)
             {
-                getArticleFlag = 0;
-                
+                Console.WriteLine(e.Message);
+                flag = 0;
             }
-            finally
-            {
-                returnJson.Add("getArticleFlag", getArticleFlag.ToString());
-            }
+
+            returnJson.Add("flag", flag.ToString());
             return Json(returnJson);
         }
-
+      
     }
 
 }
