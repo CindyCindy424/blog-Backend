@@ -1276,27 +1276,15 @@ namespace Temperature.Controllers
             return Json(new { CreateFlag = flag});
         }
 
+
         /// <summary>
         /// 删除关注关系
         /// </summary>
-        /// <param name="nameOfBlogger">被关注者</param>
-        /// <param name="nameOfFans">关注者</param>
+        /// <param name="nameOfBlogger">被关注人</param>
+        /// <param name="nameOfFans">关注人（粉丝）</param>
         /// <returns></returns>
-        /// <remarks>
-        ///     返回消息内容:
-        ///     {
-        ///         GetFlag = flag 
-        ///     }
-        ///     
-        ///     flag：
-        ///     0: 未执行
-        ///     1：成功
-        ///     2：两个用户都不存在
-        ///     3：博主用户不存在
-        ///     4：粉丝用户不存在
-        /// </remarks>
         [HttpPost]
-        public JsonResult deleteFollowByNickName(string nameOfBlogger, string nameOfFans)
+        public JsonResult deleteFollowByNickNames(string nameOfBlogger, string nameOfFans)
         {
             int flag = 0;
             var BloggerId =
@@ -1318,14 +1306,154 @@ namespace Temperature.Controllers
                 else
                     flag = 4; //粉丝用户不存在
 
-                //Response.StatusCode = 404;//用户不存在
-                return Json(new { GetFlag = flag });
+                // Response.StatusCode = 404;//用户不存在
+                return Json(new { CreateFlag = flag });
             }
+
+            //var newFollow = new UserFollow { ActiveUserId = id_2, PassiveUserId = id_1 };
 
             var follow = entity.UserFollow.Find(id_2,id_1);
             entity.Entry(follow).State = EntityState.Deleted;//删除该项
             entity.SaveChanges();
-           // Response.StatusCode = 200;//成功
+
+            var user = entity.User.Find(id_1);  //user里面更新被关注数量
+            user.FollowNum--; //粉丝数减减
+            entity.Entry(user).State = EntityState.Modified;
+            entity.SaveChanges();
+
+            //Response.StatusCode = 200;//关注成功
+            flag = 1;//成功
+            return Json(new { CreateFlag = flag });
+        }
+
+
+        /// <summary>
+        /// 创建关注关系BY ID
+        /// </summary>
+        /// <param name="nameOfBlogger">被关注者</param>
+        /// <param name="nameOfFans">关注者</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回内容:
+        ///     {
+        ///         CreateFlag = flag
+        ///     }
+        ///     
+        ///     flag:
+        ///     0: 未执行
+        ///     1：成功
+        ///     2：两个用户都不存在
+        ///     3：博主用户不存在
+        ///     4：粉丝用户不存在
+        /// </remarks>
+        [HttpPost]
+        public JsonResult createFollowByID(int idOfBlogger, int idOfFans)
+        {
+            int flag = 0;
+            /*var BloggerId =
+                    (from c in entity.User
+                     where c.NickName == nameOfBlogger
+                     select c.UserId).Distinct();
+            var id_1 = BloggerId.FirstOrDefault();
+            var FansId =
+                    (from c in entity.User
+                     where c.NickName == nameOfFans
+                     select c.UserId).Distinct();
+            var id_2 = FansId.FirstOrDefault();*/
+            var userBlogger = entity.User.Find(idOfBlogger); //被关注者
+            var userFan = entity.User.Find(idOfFans);  //粉丝
+
+            if (userBlogger == default || userFan == default)
+            {
+                if (userBlogger == default && userFan == default)
+                    flag = 2; //两个用户都不存在
+                else if (userBlogger == default)
+                    flag = 3; //博主用户不存在
+                else
+                    flag = 4; //粉丝用户不存在
+
+                // Response.StatusCode = 404;//用户不存在
+                return Json(new { CreateFlag = flag });
+            }
+
+            var newFollow = new UserFollow { ActiveUserId = idOfFans, PassiveUserId = idOfBlogger };
+            entity.UserFollow.Add(newFollow);
+            entity.SaveChanges();
+
+            var user = entity.User.Find(idOfBlogger);  //user里面更新被关注数量
+            var num = user.FollowNum;
+            if (num == default)  //修改粉丝数。
+                user.FollowNum = 1;
+            else
+                user.FollowNum = num + 1;
+            entity.Entry(user).State = EntityState.Modified;
+            entity.SaveChanges();
+
+
+            //Response.StatusCode = 200;//关注成功
+            flag = 1;//成功
+            return Json(new { CreateFlag = flag });
+        }
+
+
+        /// <summary>
+        /// 删除关注关系 BY ID
+        /// </summary>
+        /// <param name="nameOfBlogger">被关注者</param>
+        /// <param name="nameOfFans">关注者</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回消息内容:
+        ///     {
+        ///         GetFlag = flag 
+        ///     }
+        ///     
+        ///     flag：
+        ///     0: 未执行
+        ///     1：成功
+        ///     2：两个用户都不存在
+        ///     3：博主用户不存在
+        ///     4：粉丝用户不存在
+        /// </remarks>
+        [HttpPost]
+        public JsonResult deleteFollowByID(int idOfBlogger, int idOfFans)
+        {
+            int flag = 0;
+            /*var BloggerId =
+                    (from c in entity.User
+                     where c.NickName == nameOfBlogger
+                     select c.UserId).Distinct();
+            var id_1 = BloggerId.FirstOrDefault();
+            var FansId =
+                    (from c in entity.User
+                     where c.NickName == nameOfFans
+                     select c.UserId).Distinct();
+            var id_2 = FansId.FirstOrDefault();*/
+            var userBlogger = entity.User.Find(idOfBlogger); //被关注者
+            var userFan = entity.User.Find(idOfFans);  //粉丝
+
+            if (userBlogger == default || userFan == default)
+            {
+                if (userBlogger == default && userFan == default)
+                    flag = 2; //两个用户都不存在
+                else if (userBlogger == default)
+                    flag = 3; //博主用户不存在
+                else
+                    flag = 4; //粉丝用户不存在
+
+                //Response.StatusCode = 404;//用户不存在
+                return Json(new { GetFlag = flag });
+            }
+
+            var follow = entity.UserFollow.Find(idOfFans,idOfBlogger);
+            entity.Entry(follow).State = EntityState.Deleted;//删除该项
+            entity.SaveChanges();
+            // Response.StatusCode = 200;//成功
+
+            userBlogger.FollowNum--; //粉丝数减减
+            entity.Entry(userBlogger).State = EntityState.Modified;
+            entity.SaveChanges();
+
             flag = 1; //成功
             return Json(new { GetFlag = flag });
 
@@ -1655,6 +1783,199 @@ namespace Temperature.Controllers
             return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
         }
 
+
+        /// <summary>
+        /// 获取用户总文章数 #1
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <returns>
+        ///     flag:0   未操作
+        ///     
+        ///     flag:1   成功
+        ///     
+        ///         返回：{ returnFlag = flag, ArticleList = Cnt }
+        ///         
+        ///     flag:2   没有该用户
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///         
+        /// </returns>
+        [HttpPost]
+        public JsonResult getUserArticleNumByName(string nick_name)
+        {
+            int flag = 0;
+            string msg = "";
+            int cnt = -1;
+            try
+            {
+                var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();
+                if (id == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+                    var ArticleCnt =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u).Distinct().Count();
+                    cnt = ArticleCnt;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (flag == 2)
+            {
+                return Json(new { returnFlag = flag });
+            }
+            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
+        }
+
+        /// <summary>
+        /// 返回用户总文章数量数 #2
+        /// </summary>
+        /// <param name="id">用户id</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        /// 
+        ///     flag:0   未操作
+        ///     
+        ///     flag:1   成功
+        ///     
+        ///         返回：{ returnFlag = flag, articleList = Cnt }
+        ///         
+        ///     flag:2   没有该用户
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///         
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserArticleNumByID(int id)
+        {
+            int flag = 0;
+            string msg = "";
+            int cnt = -1;
+            try
+            {
+                /*var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();*/
+                var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+                if (user == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+                    var ArticleCnt =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u).Distinct().Count();
+                    cnt = ArticleCnt;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (flag == 2)
+            {
+                return Json(new { returnFlag = flag });
+            }
+            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
+        }
+
+
+        /*[HttpPost]
+         * 
+         * ??什么是 返回用户的点赞数....这是啥？
+        public JsonResult getUserLikesNum(int id)
+        {
+            int flag = 0;
+            string msg = "";
+            int cnt = -1;
+            try
+            {
+                var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+                if (user == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+                    var ArticleCnt =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u).Distinct().Count();
+                    cnt = ArticleCnt;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (flag == 2)
+            {
+                return Json(new { returnFlag = flag });
+            }
+            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
+        }
+        */
+
+
+        /// <summary>
+        /// 返回热度最高的10位博主【热度 = 文章浏览量+文章点赞】
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// 
+        ///     返回：{ userID = u.UserId, userName = u.NickName, userAvator = u.Avatr }
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getFamousUser()
+        {
+            int flag = 0;
+            string msg = "";
+            try
+            {
+                var userList =
+                (from u in entity.User
+                 join right in entity.Article
+                 on u.UserId equals right.UserId
+                 orderby (right.ReadNum + right.ArticleLikes) descending
+                 select new { userID = u.UserId, userName = u.NickName, userAvator = u.Avatr }
+                ).Distinct().Take(10);
+                return Json(userList);
+            }
+            catch(Exception e)
+            {
+                var returnFlag = flag;
+                msg = e.Message;
+                return Json(new { Flag = flag });
+            }
+
+            
+
+        }
 
 
     }    

@@ -292,9 +292,38 @@
                 4：粉丝用户不存在
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.AccountController.deleteFollowByNickName(System.String,System.String)">
+        <member name="M:Temperature.Controllers.AccountController.deleteFollowByNickNames(System.String,System.String)">
             <summary>
             删除关注关系
+            </summary>
+            <param name="nameOfBlogger">被关注人</param>
+            <param name="nameOfFans">关注人（粉丝）</param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.createFollowByID(System.Int32,System.Int32)">
+            <summary>
+            创建关注关系BY ID
+            </summary>
+            <param name="nameOfBlogger">被关注者</param>
+            <param name="nameOfFans">关注者</param>
+            <returns></returns>
+            <remarks>
+                返回内容:
+                {
+                    CreateFlag = flag
+                }
+                
+                flag:
+                0: 未执行
+                1：成功
+                2：两个用户都不存在
+                3：博主用户不存在
+                4：粉丝用户不存在
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.deleteFollowByID(System.Int32,System.Int32)">
+            <summary>
+            删除关注关系 BY ID
             </summary>
             <param name="nameOfBlogger">被关注者</param>
             <param name="nameOfFans">关注者</param>
@@ -409,6 +438,56 @@
                     返回：{ returnFlag = flag }
                     
             </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleNumByName(System.String)">
+            <summary>
+            获取用户总文章数 #1
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, ArticleList = Cnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleNumByID(System.Int32)">
+            <summary>
+            返回用户总文章数量数 #2
+            </summary>
+            <param name="id">用户id</param>
+            <returns></returns>
+            <remarks>
+                flag:
+            
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, articleList = Cnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getFamousUser">
+            <summary>
+            返回热度最高的10位博主【热度 = 文章浏览量+文章点赞】
+            </summary>
+            <returns></returns>
+            <remarks>
+            
+                返回：{ userID = u.UserId, userName = u.NickName, userAvator = u.Avatr }
+                
+            </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
@@ -1397,6 +1476,26 @@
                 "flag": 1
             }
              </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ZoneController.getZoneName(System.Int32)">
+            <summary>
+            返回分区名
+            </summary>
+            <param name="zoneID">分区id</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag：0 未操作
+                
+                flag：1 成功
+                
+                    返回：{ Flag = returnFlag, zoneName = name }
+                    
+                flag：2 不存在该分区
+                
+                    返回：{ Flag = returnFlag, errorMsg = msg }
+            </remarks>
         </member>
     </members>
 </doc>
