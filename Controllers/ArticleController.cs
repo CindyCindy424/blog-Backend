@@ -427,7 +427,7 @@ namespace Temperature.Controllers
         ///     返回内容：
         ///     {
         ///           ReturnFlag = flag, 
-        ///           Item = item
+        ///           Item = item //内容里user_id 修改为 Nick_Name
         ///     }
         ///     
         ///     flag:
@@ -468,8 +468,10 @@ namespace Temperature.Controllers
 
             var item =
                 (from u in entity.ArticleCommentReply
+                            join right in entity.User
+                            on u.UserId equals right.UserId
                  where u.ArticleId == A_id
-                 select u).Distinct();
+                 select new { Article_cr_id = u.ArticleCrId,Article_cr_content = u.ArticleCrContent,Article_id = u.ArticleId,Nick_name = right.NickName,Article_cr_time = u.ArticleCrTime,Parent_cr_id = u.ParentCrId}).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;

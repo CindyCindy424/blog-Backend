@@ -516,7 +516,7 @@
                 返回内容：
                 {
                       ReturnFlag = flag, 
-                      Item = item
+                      Item = item //内容里user_id 修改为 Nick_Name
                 }
                 
                 flag:
@@ -678,6 +678,36 @@
             <param name="pageSize"></param>
             <param name="zoneID"></param>
             <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32)">
+            <summary>
+            获取阅读量前number个文章
+            按照阅读量获取前若干文章
+            </summary>
+            <param name="takeArticleNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getNewestcomment(System.Int32)">
+            <summary>
+            获取最新评论
+            </summary>
+            <param name="articleid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getRecommandedArticle(System.Int32,System.Int32)">
+            <summary>
+            分页返回所有文章——按照（浏览量+点赞量）从大到小的顺序
+            </summary>
+            <param name="pageNum">页号</param>
+            <param name="pageSize">一页大小</param>
+            <returns></returns>
+            <remarks>
+                flag:
+                0:未操作
+                1：成功
+                
+                返回：{Result = content,getArticleFlag = flag}
+            </remarks>
         </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>

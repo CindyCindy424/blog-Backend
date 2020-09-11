@@ -516,7 +516,7 @@
                 返回内容：
                 {
                       ReturnFlag = flag, 
-                      Item = item
+                      Item = item //内容里user_id 修改为 Nick_Name
                 }
                 
                 flag:
@@ -679,13 +679,19 @@
             <param name="zoneID"></param>
             <returns></returns>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.getArticleByNum(System.Int32,System.Int32,System.String)">
+        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32)">
             <summary>
-            分区内的文章按照或度量排名
+            获取阅读量前number个文章
+            按照阅读量获取前若干文章
             </summary>
-            <param name="pageNum"></param>
-            <param name="pageSize"></param>
-            <param name="zoneID"></param>
+            <param name="takeArticleNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getNewestcomment(System.Int32)">
+            <summary>
+            获取最新评论
+            </summary>
+            <param name="articleid"></param>
             <returns></returns>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.getRecommandedArticle(System.Int32,System.Int32)">

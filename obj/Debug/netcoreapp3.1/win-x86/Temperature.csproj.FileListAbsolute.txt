@@ -507,3 +507,4 @@ D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\后端\Cind
 D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\后端\Cindy's Code\Temperature\bin\Debug\netcoreapp3.1\win-x86\Microsoft.Web.Infrastructure.dll
 D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\后端\Cindy's Code\Temperature\bin\Debug\netcoreapp3.1\win-x86\Swashbuckle.AspNetCore.Annotations.dll
 D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\后端\Cindy's Code\Temperature\bin\Debug\netcoreapp3.1\win-x86\System.IdentityModel.Tokens.Jwt.dll
+D:\我的D盘\同济大学\大二下\数据库小学期项目\后端\后端\Cindy's Code\Temperature\bin\Debug\netcoreapp3.1\win-x86\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll

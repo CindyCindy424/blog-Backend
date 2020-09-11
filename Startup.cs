@@ -44,7 +44,7 @@ namespace Temperature
                 });*/
 
                 options.EnableAnnotations();  //配置返回参数的注释
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "【0910 v3】 1)Account 接口，Topic接口   2)新增Account2个接口" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "【0911 v1】 1）修改article接口" });
                 // ��ȡxml�ļ���
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 // ��ȡxml�ļ�·��
