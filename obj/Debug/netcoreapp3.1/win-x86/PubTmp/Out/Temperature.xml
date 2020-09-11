@@ -200,10 +200,17 @@
             <returns></returns>
             <remarks>
                 返回内容：
+                
                 {
+                
                     uploadFlag = flag,
+                    
+                    userAnnouncement = announcement,  //最新修改
+                    
                     userInfo = user
+                    
                 }
+                
                 flag:
                 0: 未执行
                 1：成功
@@ -449,7 +456,7 @@
                 
                 flag:1   成功
                 
-                    返回：{ returnFlag = flag, ArticleList = Cnt }
+                    返回：{ returnFlag = flag, Count = Cnt }
                     
                 flag:2   没有该用户
                 
@@ -470,7 +477,7 @@
                 
                 flag:1   成功
                 
-                    返回：{ returnFlag = flag, articleList = Cnt }
+                    返回：{ returnFlag = flag, Count = Cnt }
                     
                 flag:2   没有该用户
                 
@@ -522,6 +529,26 @@
                 
                 flag：1 成功
                     返回：{ Flag = flag, Count = cnt }    
+            
+                flag：2 没有该用户
+                
+                    返回：{ Flag = flag, errorMsg = msg }
+                
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserLikesReplyArticleNum(System.Int32)">
+            <summary>
+            返回用户的文章总数、评论数、点赞数
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag:0 未操作
+                
+                flag：1 成功
+                    返回：{ Flag = flag, likesCnt = LikesCnt,replyCnt = ReplyCnt,articleCnt = ArticleCnt}    
             
                 flag：2 没有该用户
                 

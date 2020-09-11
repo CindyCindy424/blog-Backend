@@ -991,10 +991,17 @@ namespace Temperature.Controllers
         /// <returns></returns>
         /// <remarks>
         ///     返回内容：
+        ///     
         ///     {
+        ///     
         ///         uploadFlag = flag,
+        ///         
+        ///         userAnnouncement = announcement,  //最新修改
+        ///         
         ///         userInfo = user
+        ///         
         ///     }
+        ///     
         ///     flag:
         ///     0: 未执行
         ///     1：成功
@@ -1016,9 +1023,17 @@ namespace Temperature.Controllers
                 return Json(new { UploadFlag = flag });
             }*/
             var user = entity.User.Find(user_id); //在数据库中根据key找到相应记录
+
+            var annoucement =
+                (from u in entity.Announcement
+                 where u.UserId == user_id
+                 select u.AnnouncementContent).Distinct().FirstOrDefault();
+            
+
             flag = 1;//找到该用户
                      // Response.StatusCode = 200;//成功
-            return Json(new { uploadFlag = flag, userInfo = user });
+
+            return Json(new { uploadFlag = flag, userAnnouncement = annoucement ,userInfo = user });
         }
 
 
@@ -1793,7 +1808,7 @@ namespace Temperature.Controllers
         ///     
         ///     flag:1   成功
         ///     
-        ///         返回：{ returnFlag = flag, ArticleList = Cnt }
+        ///         返回：{ returnFlag = flag, Count = Cnt }
         ///         
         ///     flag:2   没有该用户
         ///     
@@ -1837,7 +1852,7 @@ namespace Temperature.Controllers
             {
                 return Json(new { returnFlag = flag });
             }
-            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
+            return Json(new { returnFlag = flag, Count = cnt }); //flag =1
         }
 
         /// <summary>
@@ -1852,7 +1867,7 @@ namespace Temperature.Controllers
         ///     
         ///     flag:1   成功
         ///     
-        ///         返回：{ returnFlag = flag, articleList = Cnt }
+        ///         返回：{ returnFlag = flag, Count = Cnt }
         ///         
         ///     flag:2   没有该用户
         ///     
@@ -1897,7 +1912,7 @@ namespace Temperature.Controllers
             {
                 return Json(new { returnFlag = flag });
             }
-            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
+            return Json(new { returnFlag = flag, Count = cnt }); //flag =1
         }
 
 
@@ -2100,6 +2115,87 @@ namespace Temperature.Controllers
 
             if (flag == 1)
             { return Json(new { Flag = flag, Count = cnt }); }
+            else
+            {
+                return Json(new { Flag = flag, errorMsg = msg });
+            }
+        }
+
+
+        /// <summary>
+        /// 返回用户的文章总数、评论数、点赞数
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag:0 未操作
+        ///     
+        ///     flag：1 成功
+        ///         返回：{ Flag = flag, likesCnt = LikesCnt,replyCnt = ReplyCnt,articleCnt = ArticleCnt}    
+        /// 
+        ///     flag：2 没有该用户
+        ///     
+        ///         返回：{ Flag = flag, errorMsg = msg }
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserLikesReplyArticleNum(int id)
+        {
+            int flag = 0;
+            int? LikesCnt = 0;
+            int? ReplyCnt = 0;
+            int? ArticleCnt = 0;
+            string msg = "";
+            try
+            {
+                /*var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();*/
+                var user = entity.User.Find(id);
+
+                if (user == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+
+                    //点赞数
+                    LikesCnt =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u.ArticleLikes).Distinct().Sum();
+
+
+                    //评论数
+                    ReplyCnt =
+                       (from u in entity.ArticleCommentReply
+                        join right in entity.Article
+                        on u.ArticleId equals right.ArticleId
+                        where right.UserId == id
+                        select u.ArticleCrId).Distinct().Count();
+
+                    //文章数
+                    ArticleCnt =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u).Distinct().Count();
+
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+
+            if (flag == 1)
+            { return Json(new { Flag = flag, likesCnt = LikesCnt,replyCnt = ReplyCnt,articleCnt = ArticleCnt }); }
             else
             {
                 return Json(new { Flag = flag, errorMsg = msg });
