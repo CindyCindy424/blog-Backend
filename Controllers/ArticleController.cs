@@ -9,6 +9,7 @@ using Temperature.Models;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 //20200907 订正后的articlecontroller
 namespace Temperature.Controllers
@@ -207,10 +208,10 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, UserID = id, result = "NOT FOUND" });
             }
 
-            //根据用户ID和文章名找到对应文章
+            //根据文章名找到对应文章
             var articleid =
                     (from c in entity.Article
-                     where (c.Title == title)
+                     where c.Title == title 
                      select c.ArticleId).Distinct();
             var A_id = articleid.FirstOrDefault();
             if (A_id == default)
@@ -233,11 +234,10 @@ namespace Temperature.Controllers
             item.UserId = id;
             entity.ArticleVisit.Add(item);
             entity.SaveChanges();
-
             var info = entity.Article.Find(A_id);
             //Response.StatusCode = 200;//成功
             flag = 1;
-            return Json(new { ReturnFlag = flag, INFO = info });
+            return Json(new { ReturnFlag = flag,INFO = info });
         }
 
         /// <summary>
@@ -930,40 +930,63 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
-        /// 分区内的文章按照或度量排名
+        /// 获取阅读量前number个文章
+        /// 按照阅读量获取前若干文章
         /// </summary>
-        /// <param name="pageNum"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="zoneID"></param>
+        /// <param name="takeArticleNum"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult getArticleByNum(int pageNum, int pageSize, string zoneID)
+        public JsonResult getArticlebyreadnum(int takeArticleNum)
         {
-            int getArticleFlag = 0;
+            int flag = 0;
             Dictionary<string, string> returnJson = new Dictionary<string, string>();
-            returnJson.Add("Result", "");
 
             try
             {
-                var content = (from c in entity.Article
-                               where c.ZoneId == int.Parse(zoneID)
-                               orderby c.ReadNum descending  //按照从大到小的顺序进行排序  
-                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                var content = entity.Article.OrderByDescending(c => c.ReadNum).Take(takeArticleNum);
 
-                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
-                returnJson["Result"] = contentJson;
-                getArticleFlag = 1;
-
+                returnJson.Add("articless", JsonConvert.SerializeObject(content));
+                flag = 1;
             }
             catch (Exception e)
             {
-                getArticleFlag = 0;
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
 
-            }
-            finally
+            returnJson.Add("flag", flag.ToString());
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 获取最新评论
+        /// </summary>
+        /// <param name="articleid"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getNewestcomment(int articleid)
+        {
+            int flag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+
+            try
             {
-                returnJson.Add("getTopicFlag", getArticleFlag.ToString());
+                var content = (from c in entity.ArticleCommentReply
+                               where c.ArticleId == articleid 
+                               orderby  c.ArticleCrTime descending
+                               select c).Distinct();
+               // var content1 = entity.ArticleCommentReply.OrderByDescending(c => c.ArticleCrTime ).Take(takeTopicNum);
+
+                returnJson.Add("comment", JsonConvert.SerializeObject(content));
+                flag = 1;
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            returnJson.Add("flag", flag.ToString());
             return Json(returnJson);
         }
 
