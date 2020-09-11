@@ -292,9 +292,38 @@
                 4：粉丝用户不存在
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.AccountController.deleteFollowByNickName(System.String,System.String)">
+        <member name="M:Temperature.Controllers.AccountController.deleteFollowByNickNames(System.String,System.String)">
             <summary>
             删除关注关系
+            </summary>
+            <param name="nameOfBlogger">被关注人</param>
+            <param name="nameOfFans">关注人（粉丝）</param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.createFollowByID(System.Int32,System.Int32)">
+            <summary>
+            创建关注关系BY ID
+            </summary>
+            <param name="nameOfBlogger">被关注者</param>
+            <param name="nameOfFans">关注者</param>
+            <returns></returns>
+            <remarks>
+                返回内容:
+                {
+                    CreateFlag = flag
+                }
+                
+                flag:
+                0: 未执行
+                1：成功
+                2：两个用户都不存在
+                3：博主用户不存在
+                4：粉丝用户不存在
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.deleteFollowByID(System.Int32,System.Int32)">
+            <summary>
+            删除关注关系 BY ID
             </summary>
             <param name="nameOfBlogger">被关注者</param>
             <param name="nameOfFans">关注者</param>
@@ -410,12 +439,65 @@
                     
             </returns>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleNumByName(System.String)">
+            <summary>
+            获取用户总文章数 #1
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, ArticleList = Cnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleNumByID(System.Int32)">
+            <summary>
+            返回用户总文章数量数 #2
+            </summary>
+            <param name="id">用户id</param>
+            <returns></returns>
+            <remarks>
+                flag:
+            
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, articleList = Cnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getFamousUser">
+            <summary>
+            返回热度最高的10位博主【热度 = 文章浏览量+文章点赞】
+            </summary>
+            <returns></returns>
+            <remarks>
+            
+                返回：{ userID = u.UserId, userName = u.NickName, userAvator = u.Avatr }
+                
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
+            创建文章
             创建文章名为nick_name用户创建一篇题目为title内容为content的文章
             </summary>
             <param name="nick_name"></param>
-            <param name="articleName"></param>
+            <param name="title"></param>
+            <param name="content"></param>
+            <param name="zoneid"></param>
             <returns></returns>
             <remarks>
                 返回内容：
@@ -440,7 +522,7 @@
             </summary>
             <param name="nick_name"></param>
             <param name="title"></param>
-            <param name="articlecommentID"></param>
+            <param name="content"></param>
             <returns></returns>
             <remarks>
                 返回内容：
@@ -516,7 +598,7 @@
                 返回内容：
                 {
                       ReturnFlag = flag, 
-                      Item = item //内容里user_id 修改为 Nick_Name
+                      Item = item
                 }
                 
                 flag:
@@ -620,6 +702,48 @@
                 3：没找到该文章
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.ArticleController.addArticleLikeByTitle(System.String,System.String)">
+            <summary>
+            articlelikes加一
+            </summary>
+            <param name="nick_name"></param>
+            <param name="title"></param>
+            <returns></returns>
+             <remarks>
+                返回内容：
+                {
+                      ReturnFlag = flag, 
+                      result = "successful"
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+                2：没有找到该用户
+                3：没找到该文章
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.addArticleCollectByTitle(System.String,System.String)">
+            <summary>
+            collectNum加1
+            </summary>
+            <param name="nick_name"></param>
+            <param name="title"></param>
+            <returns></returns>
+             <remarks>
+                返回内容：
+                {
+                      ReturnFlag = flag, 
+                      result = "successful"
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+                2：没有找到该用户
+                3：没找到该文章
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.updateArticleCommentByID(System.String,System.Int32,System.String)">
             <summary>
             更新评论
@@ -652,7 +776,6 @@
             </summary>
             <param name="nick_name"></param>
             <param name="articlecommentID1"></param>
-            <param name="articlecommentID2"></param>
             <param name="content"></param>
             <returns></returns>
             <remarks>
@@ -671,14 +794,27 @@
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.getArticleByPage(System.Int32,System.Int32,System.String)">
-            <summary>
-            分页获取zone的article
-            </summary>
-            <param name="pageNum"></param>
-            <param name="pageSize"></param>
-            <param name="zoneID"></param>
-            <returns></returns>
+             <summary>
+             分页获取zone的article
+             </summary>
+             <param name="pageNum"></param>
+             <param name="pageSize"></param>
+             <param name="zoneID"></param>
+             <returns></returns>
+            <remarks>
+                 返回内容：
+                 {
+                      getFlag = getArticleFlag, 
+                      
+                       result = contentJson
+                 }
+                 
+                 flag:
+                 0：未操作
+                 1：成功
+             </remarks>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.getUserArticlebypage(System.Int32,System.Int32,System.String)" -->
         <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32)">
             <summary>
             获取阅读量前number个文章
@@ -686,13 +822,39 @@
             </summary>
             <param name="takeArticleNum"></param>
             <returns></returns>
+            <remarks>
+                返回内容：
+                {
+                     flag = flag, 
+                     
+                     articless = content
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+            </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.getNewestcomment(System.Int32)">
+        <member name="M:Temperature.Controllers.ArticleController.getNewestComment(System.Int32,System.String)">
             <summary>
-            获取最新评论
+            获取一个用户所有文章的最新评论
             </summary>
-            <param name="articleid"></param>
+            <param name="takeCommentNum"></param>
+            <param name="nick_name"></param>
             <returns></returns>
+             <remarks>
+                返回内容：
+                {
+                     flag = flag, 
+                     
+                    comment = content
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+                2：找不到用户
+            </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.getRecommandedArticle(System.Int32,System.Int32)">
             <summary>
@@ -1397,6 +1559,26 @@
                 "flag": 1
             }
              </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ZoneController.getZoneName(System.Int32)">
+            <summary>
+            返回分区名
+            </summary>
+            <param name="zoneID">分区id</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag：0 未操作
+                
+                flag：1 成功
+                
+                    返回：{ Flag = returnFlag, zoneName = name }
+                    
+                flag：2 不存在该分区
+                
+                    返回：{ Flag = returnFlag, errorMsg = msg }
+            </remarks>
         </member>
     </members>
 </doc>
