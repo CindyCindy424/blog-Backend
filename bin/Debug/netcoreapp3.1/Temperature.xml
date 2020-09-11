@@ -501,11 +501,32 @@
                 flag:0 未操作
                 
                 flag：1 成功
-                
+                    返回：{ Flag = flag, Count = cnt }
+                    
                 flag：2 没有该用户
                 
                     返回：{ Flag = flag, errorMsg = msg }
                     
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleLikesNum(System.Int32)">
+            <summary>
+            获取用户总点赞数
+            </summary>
+            <param name="id">用户id</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag:0 未操作
+                
+                flag：1 成功
+                    返回：{ Flag = flag, Count = cnt }    
+            
+                flag：2 没有该用户
+                
+                    返回：{ Flag = flag, errorMsg = msg }
+                
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
@@ -617,7 +638,7 @@
                 返回内容：
                 {
                       ReturnFlag = flag, 
-                      Item = item
+                      Item = item //内容里user_id 修改为 Nick_Name
                 }
                 
                 flag:
@@ -1443,6 +1464,27 @@
                 {......}
             ]
               失败：flag = 2
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getMyTopicByPage(System.String,System.Int32,System.Int32)">
+            <summary>
+            分页获取userID代表的用户创建的topic
+            </summary>
+            <param name="userID">用户ID</param>
+            <param name="pageNum">页号</param>
+            <param name="pageSize">每页大小</param>
+            <response code="200">成功</response>
+            <response code="403">无法获取，出现错误/异常</response>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1
+              Result : [
+                {topicID:, topicContent:, answerNum:, userID:, topicUpdateTime:, zoneID:},
+                {......}
+            ]
+              失败：flag = 0
             }
             </remarks>
         </member>

@@ -1988,7 +1988,8 @@ namespace Temperature.Controllers
         ///     flag:0 未操作
         ///     
         ///     flag：1 成功
-        ///     
+        ///         返回：{ Flag = flag, Count = cnt }
+        ///         
         ///     flag：2 没有该用户
         ///     
         ///         返回：{ Flag = flag, errorMsg = msg }
@@ -2042,6 +2043,25 @@ namespace Temperature.Controllers
 
         }
 
+
+        /// <summary>
+        /// 获取用户总点赞数
+        /// </summary>
+        /// <param name="id">用户id</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag:0 未操作
+        ///     
+        ///     flag：1 成功
+        ///         返回：{ Flag = flag, Count = cnt }    
+        /// 
+        ///     flag：2 没有该用户
+        ///     
+        ///         返回：{ Flag = flag, errorMsg = msg }
+        ///     
+        /// </remarks>
         [HttpPost]
         public JsonResult getUserArticleLikesNum(int id)
         {
