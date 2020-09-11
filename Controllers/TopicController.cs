@@ -235,6 +235,49 @@ namespace Temperature.Controllers {
         }
 
         /// <summary>
+        /// 分页获取userID代表的用户创建的topic
+        /// </summary>
+        /// <param name="userID">用户ID</param>
+        /// <param name="pageNum">页号</param>
+        /// <param name="pageSize">每页大小</param>
+        /// <response code="200">成功</response>
+        /// <response code="403">无法获取，出现错误/异常</response>
+        /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   Result : [
+        ///     {topicID:, topicContent:, answerNum:, userID:, topicUpdateTime:, zoneID:},
+        ///     {......}
+        /// ]
+        ///   失败：flag = 0
+        /// }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getMyTopicByPage(string userID, int pageNum, int pageSize) {
+            int flag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try {
+                var content = (from c in entity.Topic
+                               where c.UserId == int.Parse(userID)
+                               select c).OrderByDescending(c => c.TopicUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
+                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                returnJson["Result"] = contentJson;
+                flag = 1;
+
+            } catch (Exception e) {
+                flag = 0;
+            } finally {
+                returnJson.Add("getTopicFlag", flag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+
+
+        /// <summary>
         /// 获取topicID话题下的评论
         /// </summary>
         /// <param name="topicID"></param>
