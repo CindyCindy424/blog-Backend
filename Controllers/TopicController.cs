@@ -219,7 +219,7 @@ namespace Temperature.Controllers {
             try {
                 var content = (from c in entity.Topic
                                where c.ZoneId == int.Parse(zoneID)
-                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                               select c).OrderByDescending(c => c.TopicUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
 
                 string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                 returnJson["Result"] = contentJson;
@@ -392,6 +392,7 @@ namespace Temperature.Controllers {
 
                 //选取此topic的所有一级评论
                 var topicAnswer = (from c in entity.TopicAnswerReply
+                                   join d in entity.User on c.UserId equals d.UserId
                                    where c.TopicId == topic.TopicId && c.ParentAnswerId == -1
                                    select new {
                                        TopicAnswerID = c.TopicAnswerId,
@@ -399,16 +400,19 @@ namespace Temperature.Controllers {
                                        AnswerLikes = c.AnswerLikes,
                                        Content = c.AnswerContent,
                                        UserID = c.UserId,
+                                       UserNickName = d.NickName,
+                                       UserAvatr = d.Avatr,
                                        UploadTime = c.AnswerUploadTime,
                                        ParentAnswerID = c.ParentAnswerId
                                    });
 
                 //每个一级评论中
                 foreach(var t in topicAnswer.ToList()) {
-                    var a = new { topicInfo = JsonConvert.SerializeObject(t),
+                    var a = new { firstLevelComment = JsonConvert.SerializeObject(t),
                                   userComments = new List<string>()};
 
                     var allSecondLevelAnswer = (from c in entity.TopicAnswerReply
+                                                join d in entity.User on c.UserId equals d.UserId
                                                 where c.ParentAnswerId == t.TopicAnswerID
                                                 select new {
                                                     TopicAnswerID = c.TopicAnswerId,
@@ -416,21 +420,13 @@ namespace Temperature.Controllers {
                                                     AnswerLikes = c.AnswerLikes,
                                                     Content = c.AnswerContent,
                                                     UserID = c.UserId,
+                                                    UserNickName = d.NickName,
+                                                    UserAvatr = d.Avatr,
                                                     UploadTime = c.AnswerUploadTime,
                                                     ParentAnswerID = c.ParentAnswerId
                                                 });
                     foreach (var tt in allSecondLevelAnswer.ToList()) {
-                        var answerUser2 = (from c in entity.User
-                                          where c.UserId == tt.UserID
-                                          select new {
-                                               userID = c.UserId,
-                                               nickName = c.NickName,
-                                               avatr = c.Avatr,
-                                               gender = c.Gender
-                                           }).FirstOrDefault();
-                        var aa = new { userComment = JsonConvert.SerializeObject(tt),
-                                       userInfo = JsonConvert.SerializeObject(answerUser2) };
-                        a.userComments.Add(JsonConvert.SerializeObject(aa) );
+                        a.userComments.Add(JsonConvert.SerializeObject(tt) );
                     }
                     answerUserList.Add(JsonConvert.SerializeObject(a) );
                 }
