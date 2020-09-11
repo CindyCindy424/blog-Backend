@@ -489,6 +489,25 @@
                 
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserArticleReplyNum(System.Int32)">
+            <summary>
+            返回用户的文章总评论数
+            </summary>
+            <param name="id">用户id</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag:0 未操作
+                
+                flag：1 成功
+                
+                flag：2 没有该用户
+                
+                    返回：{ Flag = flag, errorMsg = msg }
+                    
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
             创建文章

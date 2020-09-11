@@ -1977,6 +1977,114 @@ namespace Temperature.Controllers
 
         }
 
+        /// <summary>
+        /// 返回用户的文章总评论数
+        /// </summary>
+        /// <param name="id">用户id</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag:0 未操作
+        ///     
+        ///     flag：1 成功
+        ///     
+        ///     flag：2 没有该用户
+        ///     
+        ///         返回：{ Flag = flag, errorMsg = msg }
+        ///         
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getUserArticleReplyNum(int id)
+        {
+            int flag = 0;
+            int cnt = 0;
+            string msg = "";
+            try
+            {
+                /*var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();*/
+                var user = entity.User.Find(id);
+
+                if (user == default)
+                {
+                    flag = 2;//没有该用户
+                             //return Json(new { returnFlag = flag });
+                }
+                else
+                {
+                    var result =
+                        (from u in entity.ArticleCommentReply
+                         join right in entity.Article
+                         on u.ArticleId equals right.ArticleId
+                         where right.UserId == id
+                         select u.ArticleCrId).Distinct().Count();
+                    cnt = result;
+                    flag = 1;
+                }
+            }
+            catch(Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+
+            if(flag == 1)
+            { return Json(new { Flag = flag, Count = cnt }); }
+            else
+            {
+                return Json(new { Flag = flag, errorMsg = msg });
+            }
+
+
+        }
+
+        [HttpPost]
+        public JsonResult getUserArticleLikesNum(int id)
+        {
+            int flag = 0;
+            int? cnt = 0;
+            string msg = "";
+            try
+            {
+                /*var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();*/
+                var user = entity.User.Find(id);
+
+                if (user == default)
+                {
+                    flag = 2;//没有该用户
+                             //return Json(new { returnFlag = flag });
+                }
+                else
+                {
+                    var result =
+                        (from u in entity.Article
+                         where u.UserId == id
+                         select u.ArticleLikes).Distinct().Sum();
+                    cnt = result;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+
+            if (flag == 1)
+            { return Json(new { Flag = flag, Count = cnt }); }
+            else
+            {
+                return Json(new { Flag = flag, errorMsg = msg });
+            }
+        }
 
     }    
 
