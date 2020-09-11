@@ -62,6 +62,32 @@
                 2：用户名已经被占用
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.checkPW(System.String,System.String)">
+            <summary>
+            检查密码正确性
+            </summary>
+            <param name="nick_name"></param>
+            <param name="password"></param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag=0; 未操作
+                
+                flag =1:成功
+                
+                    返回：{ Result = "true", Flag = flag }
+                    
+                flag = 2:没有找到该用户
+                
+                    返回：{ Flag = flag }
+                    
+                flag = 3：密码不正确
+                
+                    返回：{ Result = "false", Flag = flag }
+                    
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.AccountController.nameModify(System.String,System.String)">
             <summary>
             修改用户名
@@ -151,6 +177,24 @@
         <member name="M:Temperature.Controllers.AccountController.getUserInfoByNickName(System.String)">
             <summary>
             查询用户所有基本信息
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns></returns>
+            <remarks>
+                返回内容：
+                {
+                    uploadFlag = flag,
+                    userInfo = user
+                }
+                flag:
+                0: 未执行
+                1：成功
+                2：没有找到该用户
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getUserInfoByID(System.Int32)">
+            <summary>
+            查询用户所有基本信息 【BY ID】
             </summary>
             <param name="nick_name">用户名</param>
             <returns></returns>
@@ -329,6 +373,42 @@
                 
                     返回：{ returnFlag = flag }
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getFollowNum(System.String)">
+            <summary>
+            获取用户关注数 (该用户是“粉丝”身份）
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, FollowCnt = followCnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getFanNum(System.String)">
+            <summary>
+            获取用户粉丝数 
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, FollowList = followCnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
@@ -1262,6 +1342,31 @@
               失败：flag = 0
             }
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getSingleTopicDetail(System.String)">
+             <summary>
+             返回某个topic的详情信息
+             </summary>
+             <param name="topicID"></param>
+             <returns></returns>
+             <remarks>
+             {
+                "topicDetail": {
+                    "topicId": 2,
+                    "topicContent": "222222222222222222222222",
+                    "answerNum": 5,
+                    "userId": 2,
+                    "topicUploadTime": "2020-08-26T14:34:00",
+                    "zoneId": 3,
+                    "topicTitle": null,
+                    "user": null,
+                    "zone": null,
+                    "topicAnswerReply": [],
+                    "topicRank": []
+                },
+                "flag": 1
+            }
+             </remarks>
         </member>
     </members>
 </doc>

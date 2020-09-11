@@ -374,6 +374,42 @@
                     返回：{ returnFlag = flag }
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.getFollowNum(System.String)">
+            <summary>
+            获取用户关注数 (该用户是“粉丝”身份）
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, FollowCnt = followCnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
+        </member>
+        <member name="M:Temperature.Controllers.AccountController.getFanNum(System.String)">
+            <summary>
+            获取用户粉丝数 
+            </summary>
+            <param name="nick_name">用户名</param>
+            <returns>
+                flag:0   未操作
+                
+                flag:1   成功
+                
+                    返回：{ returnFlag = flag, FollowList = followCnt }
+                    
+                flag:2   没有该用户
+                
+                    返回：{ returnFlag = flag }
+                    
+            </returns>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
             创建文章名为nick_name用户创建一篇题目为title内容为content的文章
@@ -642,6 +678,30 @@
             <param name="pageSize"></param>
             <param name="zoneID"></param>
             <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getArticleByNum(System.Int32,System.Int32,System.String)">
+            <summary>
+            分区内的文章按照或度量排名
+            </summary>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="zoneID"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getRecommandedArticle(System.Int32,System.Int32)">
+            <summary>
+            分页返回所有文章——按照（浏览量+点赞量）从大到小的顺序
+            </summary>
+            <param name="pageNum">页号</param>
+            <param name="pageSize">一页大小</param>
+            <returns></returns>
+            <remarks>
+                flag:
+                0:未操作
+                1：成功
+                
+                返回：{Result = content,getArticleFlag = flag}
+            </remarks>
         </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>
@@ -1306,6 +1366,31 @@
               失败：flag = 0
             }
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.getSingleTopicDetail(System.String)">
+             <summary>
+             返回某个topic的详情信息
+             </summary>
+             <param name="topicID"></param>
+             <returns></returns>
+             <remarks>
+             {
+                "topicDetail": {
+                    "topicId": 2,
+                    "topicContent": "222222222222222222222222",
+                    "answerNum": 5,
+                    "userId": 2,
+                    "topicUploadTime": "2020-08-26T14:34:00",
+                    "zoneId": 3,
+                    "topicTitle": null,
+                    "user": null,
+                    "zone": null,
+                    "topicAnswerReply": [],
+                    "topicRank": []
+                },
+                "flag": 1
+            }
+             </remarks>
         </member>
     </members>
 </doc>

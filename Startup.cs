@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.FileProviders;
+using Newtonsoft.Json;
 
 namespace Temperature
 {
@@ -43,7 +44,7 @@ namespace Temperature
                 });*/
 
                 options.EnableAnnotations();  //配置返回参数的注释
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "【0910 v1】" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1", Description = "【0910 v3】 1)Account 接口，Topic接口   2)新增Account2个接口" });
                 // ��ȡxml�ļ���
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 // ��ȡxml�ļ�·��
@@ -119,7 +120,10 @@ namespace Temperature
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecureKeySecureKeySecureKeySecureKeySecureKeySecureKey"))
                 };
             });
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(option =>
+                //忽略循环引用
+                option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            );
             services.AddMvc();
         }
 

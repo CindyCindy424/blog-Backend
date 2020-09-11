@@ -1337,168 +1337,7 @@ namespace Temperature.Controllers
             public string FanName;
             public string FanAvator;
         }
-        /*
-        /// <summary>
-        /// 返回粉丝列表
-        /// </summary>
-        /// <param name="nick_name">博主用户名</param>
-        /// <returns></returns>
-        /// <remarks>
-        ///     返回内容:
-        ///     {
-        ///         returnFlag = flag,
-        ///         fansList = fansName
-        ///     }
-        ///     
-        ///     flag:
-        ///     0: 未执行
-        ///     1：成功
-        ///     2：用户寻找失败
-        ///     3：该用户没有粉丝
-        ///     
-        /// </remarks>
-        [HttpPost]
-        public JsonResult getFansListByNickName(string nick_name)
-        {
-            int flag = 0;
-            var userid =
-                    (from c in entity.User
-                     where c.NickName == nick_name
-                     select c.UserId).Distinct();
-            var id = userid.FirstOrDefault();
-            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
-            if (id ==default )
-            {
-                flag = 2;//用户寻找失败
-                return Json(new { returnFlag = flag });
-            }
-            var fansID =
-                (from u in entity.UserFollow
-                 where u.PassiveUserId == id
-                 select u.ActiveUserId).Distinct();
-
-            var fansID =
-                (from u in entity.UserFollow
-                 where u.PassiveUserId == id
-                 select u.ActiveUserId).ToList();
-            //Dictionary<string, string> userList = new Dictionary<string, string>();
-
-            
-
-            foreach (var fan in fansID)
-            {
-                var info =
-                    (from u in entity.User
-                     where u.UserId == fan
-                     select new { u.NickName, u.Avatr } ).Distinct(); //查出用户名和头像
-
-                userList.Add("Username", name.FirstOrDefault());
-            }
-
-
-            if (fansID.FirstOrDefault()==default)
-            {
-                flag = 3;//该用户没有粉丝
-                return Json(new { returnFlag = flag });
-            }
-            flag = 1;
-            //Response.StatusCode = 200;
-            return Json(new { returnFlag = flag,fansList = fansID});
-        }
-
-
-        /// <summary>
-        /// 返回粉丝列表(xiugai)
-        /// </summary>
-        /// <param name="nick_name">博主用户名</param>
-        /// <returns></returns>
-        /// <remarks>
-        ///     返回内容:
-        ///     {
-        ///         returnFlag = flag,
-        ///         fansList = fansName
-        ///     }
-        ///     
-        ///     flag:
-        ///     0: 未执行
-        ///     1：成功
-        ///     2：用户寻找失败
-        ///     3：该用户没有粉丝
-        ///     
-        /// </remarks>
-        [HttpPost]
-        public JsonResult getFansListByNickName2(string nick_name)
-        {
-            int flag = 0;
-            var userid =
-                    (from c in entity.User
-                     where c.NickName == nick_name
-                     select c.UserId).Distinct();
-            var id = userid.FirstOrDefault();
-            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
-            if (id == default)
-            {
-                flag = 2;//用户寻找失败
-                return Json(new { returnFlag = flag });
-            }
-            var fansID =
-                (from u in entity.UserFollow
-                 where u.PassiveUserId == id
-                 select u.ActiveUserId).Distinct();
-
-            var fansID =
-                (from u in entity.UserFollow
-                 where u.PassiveUserId == id
-                 select u.ActiveUserId).ToList();
-            Dictionary<string, string> userList = new Dictionary<string, string>();
-            if (fansID.FirstOrDefault() == default)
-            {
-                flag = 3;//该用户没有粉丝
-                return Json(new { returnFlag = flag });
-            }
-
-            //Array list = [];
-           // FanInfo[] list = new FanInfo[100];
-            var cnt = 0;
-            List<FanInfo> FansList = new List<FanInfo>();
-
-            // foreach (var fan in fansID)
-            //{
-            cnt++;
-            var fan = fansID.First();
-                //var fans = fansID.FirstOrDefault();
-                var name =
-                    (from u in entity.User
-                     where u.UserId == fan
-                     select u.NickName).Distinct(); //查出用户名
-                var Name = name.FirstOrDefault();
-                var avator =
-                    (from u in entity.User
-                     where u.UserId == fan
-                     select u.Avatr).Distinct(); //头像
-                var Avator = avator.FirstOrDefault();
-            if (Name == default)
-            {
-                flag = 4; //break; }
-            }
-
-                //userList.Add("Fan" + cnt, new {Name,Avator });
-
-                FanInfo item = new FanInfo();
-                item.FanName = Name;
-                item.FanAvator = Avator;
-
-                FansList.Add(item);
-            //list[cnt] = item;
-               // userList.Add("Username", name.FirstOrDefault());
-           // }
-
-
-            
-            flag = 1;
-            //Response.StatusCode = 200;
-            return Json(new { returnFlag = flag, fansList = FansList,Thename = item.FanName, theA = item.FanAvator,ITEM= item });
-        }*/
+       
 
         /// <summary>
         /// 返回粉丝列表
@@ -1701,6 +1540,119 @@ namespace Temperature.Controllers
                 flag = 1;//成功
             //Response.StatusCode = 200; //成功
             return Json(new { returnFlag = flag, FollowList = followID });
+        }
+
+
+        /// <summary>
+        /// 获取用户关注数 (该用户是“粉丝”身份）
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <returns>
+        ///     flag:0   未操作
+        ///     
+        ///     flag:1   成功
+        ///     
+        ///         返回：{ returnFlag = flag, FollowCnt = followCnt }
+        ///         
+        ///     flag:2   没有该用户
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///         
+        /// </returns>
+        [HttpPost]
+        public JsonResult getFollowNum(string nick_name)
+        {
+            int flag = 0;
+            string msg = "";
+            int cnt = -1;
+            try
+            {
+                var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();
+                if (id == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+                    var followCnt =
+                        (from u in entity.UserFollow
+                         where u.ActiveUserId == id
+                         select u.PassiveUserId).Distinct().Count();
+                    cnt = followCnt;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if(flag == 2)
+            {
+                return Json(new { returnFlag = flag });
+            }
+            return Json(new { returnFlag = flag, FollowCnt = cnt }); //flag =1
+        }
+
+        /// <summary>
+        /// 获取用户粉丝数 
+        /// </summary>
+        /// <param name="nick_name">用户名</param>
+        /// <returns>
+        ///     flag:0   未操作
+        ///     
+        ///     flag:1   成功
+        ///     
+        ///         返回：{ returnFlag = flag, FollowList = followCnt }
+        ///         
+        ///     flag:2   没有该用户
+        ///     
+        ///         返回：{ returnFlag = flag }
+        ///         
+        /// </returns>
+        [HttpPost]
+        public JsonResult getFanNum(string nick_name)
+        {
+            int flag = 0;
+            string msg = "";
+            int cnt = -1;
+            try
+            {
+                var userid =
+                    (from c in entity.User
+                     where c.NickName == nick_name
+                     select c.UserId).Distinct();
+                var id = userid.FirstOrDefault();
+                if (id == default)
+                {
+                    flag = 2;//没有该用户
+                }
+                else
+                {
+                    var fanCnt =
+                        (from u in entity.UserFollow
+                         where u.PassiveUserId == id
+                         select u.ActiveUserId).Distinct().Count();
+                    cnt = fanCnt;
+                    flag = 1;
+                }
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            //var user = entity.User.Find(id); //在数据库中根据key找到相应记录
+            if (flag == 2)
+            {
+                return Json(new { returnFlag = flag });
+            }
+            return Json(new { returnFlag = flag, FanCnt = cnt }); //flag =1
         }
 
 

@@ -929,6 +929,13 @@ namespace Temperature.Controllers
             return Json(returnJson);
         }
 
+        /// <summary>
+        /// 分区内的文章按照或度量排名
+        /// </summary>
+        /// <param name="pageNum"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="zoneID"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult getArticleByNum(int pageNum, int pageSize, string zoneID)
         {
@@ -956,6 +963,49 @@ namespace Temperature.Controllers
             finally
             {
                 returnJson.Add("getTopicFlag", getArticleFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 分页返回所有文章——按照（浏览量+点赞量）从大到小的顺序
+        /// </summary>
+        /// <param name="pageNum">页号</param>
+        /// <param name="pageSize">一页大小</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        ///     0:未操作
+        ///     1：成功
+        ///     
+        ///     返回：{Result = content,getArticleFlag = flag}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getRecommandedArticle(int pageNum, int pageSize)
+        {
+            int getArticleFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try
+            {
+                var content = (from c in entity.Article
+                               orderby ( c.ReadNum +c.ArticleLikes ) descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
+                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+
+                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                returnJson["Result"] = contentJson;
+                getArticleFlag = 1;
+
+            }
+            catch (Exception e)
+            {
+                getArticleFlag = 0;
+                
+            }
+            finally
+            {
+                returnJson.Add("getArticleFlag", getArticleFlag.ToString());
             }
             return Json(returnJson);
         }
