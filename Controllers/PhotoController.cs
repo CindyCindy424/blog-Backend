@@ -14,7 +14,7 @@ using Temperature.Models;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Temperature.Controllers {
-    //[Authorize]
+    [Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class PhotoController : Controller {
@@ -437,17 +437,19 @@ namespace Temperature.Controllers {
             IEnumerable<object> albums = null;
 
             try {
-                albums = (from c in entity.Album
-                          join d in entity.Photo on c.AlbumId equals d.AlbumId
-                          where c.UserId == int.Parse(userID)
-                          orderby c.AlbumTime descending
+                albums = (from e in entity.Album
+                          join d in entity.Photo on e.AlbumId equals d.AlbumId
+                          into tmps
+                          from c in tmps.DefaultIfEmpty()
+                          where e.UserId == int.Parse(userID)
+                          orderby e.AlbumTime descending
                           select new {
-                              albumId = c.AlbumId,
-                              albumIntroduction = c.AlbumIntroduction,
-                              albumName = c.AlbumName,
-                              albumTime = c.AlbumTime,
-                              userId = c.UserId,
-                              firstPhoto = d.PhotoAddress,
+                              albumId = e.AlbumId,
+                              albumIntroduction = e.AlbumIntroduction,
+                              albumName = e.AlbumName,
+                              albumTime = e.AlbumTime,
+                              userId = e.UserId,
+                              firstPhoto = c.PhotoAddress,
                           }).Distinct().Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
 
                 getAllAlbumFlag = 1;
@@ -617,13 +619,23 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpPost]
+        [HttpPost]
         public ActionResult getPhotoCommentByID(string photoID) {
             int getPhotoCommentFlag = 0;
-            IQueryable<PhotoComment> photoComments = null;
+            IQueryable<Object> photoComments = null;
             try {
                 photoComments = (from c in entity.PhotoComment
+                                 join d in entity.User on c.UserId equals d.UserId
                                  where c.PhotoId == int.Parse(photoID)
-                                 select c);
+                                 select new { 
+                                    photoCommentID = c.PhotoCommentId,
+                                    photoCommentContent = c.PhotoCommentContent,
+                                    photoId = c.PhotoId,
+                                    userId = c.UserId,
+                                    photoCommentTime = c.PhotoCommentTime,
+                                    userName = d.NickName,
+                                    avatar = d.Avatr
+                                 });
 
                 getPhotoCommentFlag = 1;
             }
