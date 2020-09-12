@@ -20,6 +20,63 @@ namespace Temperature.Controllers {
     public class TopicController : Controller {
         blogContext entity = new blogContext();
 
+
+
+        /// <summary>
+        /// 创建话题
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="title"></param>
+        /// <param name="userID"></param>
+        /// <param name="zoneID"></param>
+        /// <response code="200">成功</response>
+        /// <response code="403">无法创建</response>
+        /// <returns></returns>
+        /// <remarks>
+        /// return {
+        ///   成功：flag = 1
+        ///   失败：flag = 2
+        /// }
+        /// </remarks>
+        [SwaggerResponse(200, "文档注释", typeof(Json))]
+        [HttpPost]
+        public ActionResult createTopicByID() {
+            DateTime dateTime = DateTime.Now; //获取当前时间
+            Topic topic = new Topic(); //新建topic条目项
+            int createTopicFlag = 0;
+
+            try {
+                //获取参数
+                string content = Request.Form["content"];
+                string title = Request.Form["title"];
+                string userID = Request.Form["userID"];
+                string zoneID = Request.Form["zoneID"];
+
+
+                //向条目中插入数据
+                topic.TopicContent = content;
+                topic.TopicTitle = title;
+                topic.AnswerNum = 0;
+                topic.UserId = int.Parse(userID);
+                topic.TopicUploadTime = dateTime;
+                topic.ZoneId = int.Parse(zoneID);
+
+                entity.Add(topic);
+                createTopicFlag = entity.SaveChanges(); //存入数据库 返回值为1表示成功
+                entity.Entry(topic);
+                createTopicFlag = 1;
+
+                return Json(new { topicDetail = topic, createTopicFlag = createTopicFlag });
+            }
+            catch (Exception e) {
+                Console.WriteLine(e.Message);
+                createTopicFlag = 0;
+
+                return Json(new { createTopicFlag = createTopicFlag });
+            }
+
+        }
+
         /// <summary>
         /// 创建话题回复
         /// </summary>
@@ -70,58 +127,6 @@ namespace Temperature.Controllers {
             }
 
             return Json(new { cerateTopicAnswerFlag = cerateTopicAnswerFlag });
-        }
-
-        /// <summary>
-        /// 创建话题
-        /// </summary>
-        /// <param name="content"></param>
-        /// <param name="title"></param>
-        /// <param name="userID"></param>
-        /// <param name="zoneID"></param>
-        /// <response code="200">成功</response>
-        /// <response code="403">无法创建</response>
-        /// <returns></returns>
-        /// <remarks>
-        /// return {
-        ///   成功：flag = 1
-        ///   失败：flag = 2
-        /// }
-        /// </remarks>
-        [SwaggerResponse(200, "文档注释", typeof(Json))]
-        [HttpPost]
-        public ActionResult createTopicByID() {
-            DateTime dateTime = DateTime.Now; //获取当前时间
-            Topic topic = new Topic(); //新建topic条目项
-            int createTopicFlag = 0;
-
-            try {
-                //获取参数
-                string content = Request.Form["content"];
-                string title = Request.Form["title"];
-                string userID = Request.Form["userID"];
-                string zoneID = Request.Form["zoneID"];
-
-
-                //向条目中插入数据
-                topic.TopicContent = content;
-                topic.TopicTitle = title;
-                topic.AnswerNum = 0;
-                topic.UserId = int.Parse(userID);
-                topic.TopicUploadTime = dateTime;
-                topic.ZoneId = int.Parse(zoneID);
-
-                entity.Add(topic);
-                createTopicFlag = entity.SaveChanges(); //存入数据库 返回值为1表示成功
-                createTopicFlag = 1;
-            }
-            catch (Exception e) {
-                Console.WriteLine(e.Message);
-                createTopicFlag = 0;
-            }
-
-
-            return Json(new { createTopicFlag = createTopicFlag });
         }
 
 
