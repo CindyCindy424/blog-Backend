@@ -2215,6 +2215,71 @@ namespace Temperature.Controllers
             }
         }
 
+
+        /// <summary>
+        /// 检查当前用户是否关注某用户
+        /// </summary>
+        /// <param name="idOfCurrentUser">当前用户（“粉丝”角色）</param>
+        /// <param name="idOfCheckUser">检查对象（被关注）</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag：0 未操作
+        ///     
+        ///         返回：{ result = "error", errorMsg = msg }
+        ///         
+        ///     flag：1 且idOfCurrentUser关注了idOfCheckUser
+        ///     
+        ///         返回：{ result = "True" }
+        ///         
+        ///     flag：2 未关注
+        ///     
+        ///         返回：{ result = "False" }
+        ///     
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult checkFollow(int idOfCurrentUser,int idOfCheckUser)
+        {
+            int flag = 0;
+            UserFollow result = new UserFollow();
+            string msg = "";
+            try
+            {
+                result = entity.UserFollow.Find(idOfCurrentUser, idOfCheckUser);
+                if (result == default)
+                {
+                    flag = 2;//不存在该关系
+                }
+                else
+                {
+                    flag = 1;
+                }
+            }
+            catch(Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            if(flag == 1)
+            {
+                return Json(new { result = "True" });
+            }
+            else if (flag == 2)
+            {
+                return Json(new { result = "False" });
+            }
+            else
+            {
+                return Json(new { result = "error", errorMsg = msg });
+            }
+
+
+        }
+
+
+
     }    
 
 

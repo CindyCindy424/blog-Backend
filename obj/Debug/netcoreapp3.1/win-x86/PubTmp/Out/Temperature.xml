@@ -563,6 +563,31 @@
                 
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.checkFollow(System.Int32,System.Int32)">
+            <summary>
+            检查当前用户是否关注某用户
+            </summary>
+            <param name="idOfCurrentUser">当前用户（“粉丝”角色）</param>
+            <param name="idOfCheckUser">检查对象（被关注）</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag：0 未操作
+                
+                    返回：{ result = "error", errorMsg = msg }
+                    
+                flag：1 且idOfCurrentUser关注了idOfCheckUser
+                
+                    返回：{ result = "True" }
+                    
+                flag：2 未关注
+                
+                    返回：{ result = "False" }
+                
+                
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
             <summary>
             创建文章
