@@ -34,10 +34,16 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpPost]
-        public ActionResult createTopicAnswerByID(string content, string topicID, string userID, string parentID = "-1") {
+        public ActionResult createTopicAnswerByID() {
             DateTime dateTime = DateTime.Now; //获取当前时间
             int cerateTopicAnswerFlag = 0;
             try {
+                //获取参数
+                string content = Request.Form["content"];
+                string topicID = Request.Form["topicID"];
+                string userID = Request.Form["userID"];
+                string parentID = Request.Form["parentID"];
+
                 //新建answer
                 TopicAnswerReply topicAnswerReply = new TopicAnswerReply {
                     TopicId = int.Parse(topicID),
@@ -84,25 +90,34 @@ namespace Temperature.Controllers {
         /// </remarks>
         [SwaggerResponse(200, "文档注释", typeof(Json))]
         [HttpPost]
-        public ActionResult createTopicByID(string content, string title, string userID, string zoneID) {
+        public ActionResult createTopicByID() {
             DateTime dateTime = DateTime.Now; //获取当前时间
             Topic topic = new Topic(); //新建topic条目项
             int createTopicFlag = 0;
 
-            //向条目中插入数据
-            topic.TopicContent = content;
-            topic.TopicTitle = title;
-            topic.AnswerNum = 0;
-            topic.UserId = int.Parse(userID);
-            topic.TopicUploadTime = dateTime;
-            topic.ZoneId = int.Parse(zoneID);
-
-            entity.Add(topic);
             try {
+                //获取参数
+                string content = Request.Form["content"];
+                string title = Request.Form["title"];
+                string userID = Request.Form["userID"];
+                string zoneID = Request.Form["zoneID"];
+
+
+                //向条目中插入数据
+                topic.TopicContent = content;
+                topic.TopicTitle = title;
+                topic.AnswerNum = 0;
+                topic.UserId = int.Parse(userID);
+                topic.TopicUploadTime = dateTime;
+                topic.ZoneId = int.Parse(zoneID);
+
+                entity.Add(topic);
                 createTopicFlag = entity.SaveChanges(); //存入数据库 返回值为1表示成功
+                createTopicFlag = 1;
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
+                createTopicFlag = 0;
             }
 
 
