@@ -475,7 +475,12 @@ namespace Temperature.Controllers
                  join right in entity.User
                  on u.UserId equals right.UserId
                  where u.ArticleId == A_id
-                 select new { Article_cr_id = u.ArticleCrId, Article_cr_content = u.ArticleCrContent, Article_id = u.ArticleId, Nick_name = right.NickName, Article_cr_time = u.ArticleCrTime, Parent_cr_id = u.ParentCrId }).Distinct();
+                 select new { Article_cr_id = u.ArticleCrId, 
+                     Article_cr_content = u.ArticleCrContent,
+                     Article_id = u.ArticleId,
+                     Nick_name = right.NickName, 
+                     Article_cr_time = u.ArticleCrTime, 
+                     Parent_cr_id = u.ParentCrId }).OrderByDescending(u => u.Article_cr_time).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;
@@ -614,7 +619,7 @@ namespace Temperature.Controllers
             var item =
                 (from u in entity.ArticleVisit
                  where u.ArticleId == A_id
-                 select u).Distinct();
+                 select u).OrderByDescending(u => u.ArticleVisitTime).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;
@@ -1047,7 +1052,7 @@ namespace Temperature.Controllers
             {
                 var content = (from c in entity.Article
                                where c.ZoneId == int.Parse(zoneID)
-                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                               select c).OrderByDescending(c => c.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
 
                 string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                 returnJson["Result"] = contentJson;
@@ -1093,9 +1098,29 @@ namespace Temperature.Controllers
 
             try
             {
+                // var ArticleCnt =
+                //      (from u in entity.Article
+                //     where u.UserId == id
+                //   select u).Distinct().Count();
                 var content = (from c in entity.Article
                                where c.UserId == int.Parse(userid)
-                               select c).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                               orderby c.ArticleUploadTime descending
+                               select new
+                               {
+                                   article_id = c.ArticleId,
+                                   title = c.Title,
+                                   userid = c.UserId,
+                                   articlcontent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   uploadtime = c.ArticleUploadTime,
+                                   zoneid = c.ZoneId,
+                                   commentnum = (from u in entity.ArticleCommentReply
+                                                 where u.ArticleId == c.ArticleId
+                                                 select u).Count()//.Distinct().Count()
+                               }).Skip((pageNum - 1) * pageSize).Take(pageSize); 
+             
 
                 string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                 returnJson["Result"] = contentJson;
@@ -1240,12 +1265,24 @@ namespace Temperature.Controllers
             try
             {    
              var content =
-                (from c in entity.ArticleCommentReply join right in entity.Article 
-                 on c.ArticleId equals right.ArticleId
+                (from c in entity.ArticleCommentReply 
+                 join right in entity.Article on c.ArticleId equals right.ArticleId
+                 join left in entity.User on c.UserId equals left.UserId         
                  where (right.UserId==id)
                  orderby c.ArticleCrTime descending
-                 select c).Take(takeCommentNum);
-             //   var content = entity.ArticleCommentReply.OrderByDescending(c => c.TopicUploadTime).Take(takeTopicNum);
+                 select new { Article_cr_id = c.ArticleCrId, 
+                     Article_cr_content = c.ArticleCrContent, 
+                     Article_id = c.ArticleId, Nick_name = left.NickName, 
+                     Article_cr_time = c.ArticleCrTime,
+                     Parent_cr_id = c.ParentCrId }).Take(takeCommentNum);
+            //    var item =
+          //     (from u in entity.ArticleCommentReply
+          //      join right in entity.User
+          //      on u.UserId equals right.UserId
+         //       where u.ArticleId == A_id
+          //      select new { Article_cr_id = u.ArticleCrId, Article_cr_content = u.ArticleCrContent, Article_id = u.ArticleId, Nick_name = right.NickName, Article_cr_time = u.ArticleCrTime, Parent_cr_id = u.ParentCrId }).Distinct();
+
+                //   var content = entity.ArticleCommentReply.OrderByDescending(c => c.TopicUploadTime).Take(takeTopicNum);
                 returnJson.Add("comments", JsonConvert.SerializeObject(content));
                 flag = 1;
             }
