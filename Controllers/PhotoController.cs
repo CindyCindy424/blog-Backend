@@ -432,17 +432,27 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpPost]
-        public ActionResult getAllAlbumByID(string userID) {
+        public ActionResult getAllAlbumByPage(string userID, int pageNum, int pageSize) {
             int getAllAlbumFlag = 0;
-            IQueryable<Album> albums = null;
+            IEnumerable<object> albums = null;
 
             try {
                 albums = (from c in entity.Album
+                          join d in entity.Photo on c.AlbumId equals d.AlbumId
                           where c.UserId == int.Parse(userID)
-                          select c);
+                          orderby c.AlbumTime descending
+                          select new {
+                              albumId = c.AlbumId,
+                              albumIntroduction = c.AlbumIntroduction,
+                              albumName = c.AlbumName,
+                              albumTime = c.AlbumTime,
+                              userId = c.UserId,
+                              firstPhoto = d.PhotoAddress,
+                          }).DistinctBy(c => c.albumId).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
 
                 getAllAlbumFlag = 1;
-            } catch(Exception e) {
+            }
+            catch (Exception e) {
                 Console.WriteLine(e.Message);
                 getAllAlbumFlag = 0;
             }
@@ -473,14 +483,14 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpPost]
-        public ActionResult getAllPhotoByID(string albumID, string userID) {
+        public ActionResult getAllPhotoByPage(string albumID, string userID, int pageNum, int pageSize) {
             DateTime dateTime = DateTime.Now;
             int getAllPhotoFlag = 0;
             IQueryable<Photo> photos = null;
             try {
                 photos = (from c in entity.Photo
                           where c.AlbumId == int.Parse(albumID)
-                          select c);
+                          select c).OrderByDescending(c => c.PhotoUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面;
 
                 AlbumVisit albumVisit = new AlbumVisit();
                 albumVisit.AlbumId = int.Parse(albumID);
@@ -499,6 +509,58 @@ namespace Temperature.Controllers {
                 getAllPhotoFlag = getAllPhotoFlag,
             };
             return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 返回图片详情
+        /// </summary>
+        /// <param name="photoID"></param>
+        /// <returns></returns>
+        /// <remarks>{
+        ///  "photoDetail": {
+        ///    "photoID": 16,
+        ///    "albumID": 13,
+        ///    "photoLikes": 16,
+        ///    "visitNum": 0,
+        ///    "photoUploadTime": "2020-08-31T09:58:07",
+        ///    "userID": 1,
+        ///    "userName": "a",
+        ///    "avatar": null,
+        ///    "commentNums": 3
+        ///  },
+        ///  "flag": 1
+        ///}
+        ///</remarks>
+        [HttpPost]
+        public JsonResult getPhotoDetail(string photoID) {
+            int flag = 0;
+             try {
+                int count = (from c in entity.PhotoComment
+                             where c.PhotoId == int.Parse(photoID)
+                             select c).Count();
+                var content = (from c in entity.Photo
+                               join d in entity.User on c.UserId equals d.UserId
+                               where c.PhotoId == int.Parse(photoID)
+                               select new {
+                                   photoID = c.PhotoId,
+                                   albumID = c.AlbumId,
+                                   photoLikes = c.PhotoLikes,
+                                   visitNum = c.VisitNum,
+                                   photoUploadTime = c.PhotoUploadTime,
+                                   userID = c.UserId,
+                                   userName = d.NickName,
+                                   avatar = d.Avatr,
+                                   commentNums = count
+                               }).FirstOrDefault();
+                flag = 1;
+
+                return Json(new { photoDetail = content, flag = flag });
+
+
+            } catch(Exception e) {
+                Console.WriteLine(e.Message);
+                return Json(new { flag = flag });
+            }
         }
 
         /// <summary>
