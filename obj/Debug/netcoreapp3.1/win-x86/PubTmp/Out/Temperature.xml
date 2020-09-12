@@ -685,9 +685,9 @@
             </remarks>
         </member>
         <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.deleteArticleCommentByID(System.String,System.Int32)" -->
-        <member name="M:Temperature.Controllers.ArticleController.getArticleCommentByTitle(System.String,System.String)">
+        <member name="M:Temperature.Controllers.ArticleController.getArticleCommentByTitle(System.String,System.String,System.Int32,System.Int32)">
             <summary>
-            查看文章评论
+            查看文章评论，分页
             名为nick_name用户查看一篇题目为title的文章的所有评论
             </summary>
             <param name="nick_name"></param>
@@ -968,6 +968,20 @@
                 1：成功
                 
                 返回：{Result = content,getArticleFlag = flag}
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getSearchedArticle(System.String)">
+            <summary>
+            article关键字搜索
+            </summary>
+            <param name="searchContent"></param>
+            <returns></returns>
+            <remarks>
+                flag:
+                0:未操作
+                1：成功
+                
+                返回：{Result = content,flag = flag}
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
