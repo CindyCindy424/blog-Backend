@@ -1680,6 +1680,40 @@
             }
              </remarks>
         </member>
+        <member name="M:Temperature.Controllers.TopicController.getSearchedTopic(System.String)">
+             <summary>
+             topicId关键字搜索
+             </summary>
+             <param name="searchContent"></param>
+             <returns></returns>
+             <remarks>
+            {
+              "topicDetail": [
+                {
+                  "topicTitle": "发过很多345附加复合弓",
+                  "topicId": 2,
+                  "topicContent": "22222222topic32222222222222222",
+                  "answerNum": 6,
+                  "userId": 2,
+                  "topicUploadTime": "2020-08-26T14:34:00",
+                  "zoneId": 3,
+                  "zoneName": "dfd"
+                },
+                {
+                  "topicTitle": "发过很多345附加复合弓",
+                  "topicId": 7,
+                  "topicContent": "1",
+                  "answerNum": 0,
+                  "userId": 2,
+                  "topicUploadTime": "2020-08-26T14:59:17",
+                  "zoneId": 3,
+                  "zoneName": "dfd"
+                }
+              ],
+              "flag": 1
+            }
+             </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ZoneController.getZoneName(System.Int32)">
             <summary>
             返回分区名
