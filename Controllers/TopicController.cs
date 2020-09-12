@@ -607,6 +607,7 @@ namespace Temperature.Controllers {
                                join d in entity.Zone on c.ZoneId equals d.ZoneId
                                where c.TopicId == int.Parse(topicID)
                                select new {
+                                   topicTitle = c.TopicTitle,
                                    topicId = c.TopicId,
                                    topicContent = c.TopicContent,
                                    answerNum = c.AnswerNum,
