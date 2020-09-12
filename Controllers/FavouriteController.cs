@@ -504,7 +504,7 @@ namespace Temperature.Controllers
         ///     
         ///     1：成功
         ///     
-        ///         返回：{ReturnFlag = flag, result = "successful deleted"}
+        ///         返回：{ ReturnFlag = flag, Item = item }
         ///         
         ///     2：没找到该用户
         ///     
@@ -555,9 +555,98 @@ namespace Temperature.Controllers
             return Json(new { ReturnFlag = flag, Item = item });
         }
 
-       
+        /// <summary>
+        /// 获取用户收藏夹列表 （返回收藏夹id&收藏夹名和文章数）
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///      返回：
+        ///      
+        ///      flag：0 未操作/出错
+        ///      
+        ///         返回：{ Flag = flag, errorMsg = msg }
+        ///         
+        ///      flag：1 成功
+        ///      
+        ///          返回：{ Flag = flag, List = result }
+        ///          
+        ///      flag：2 该用户不存在
+        ///      
+        ///         返回：{ Flag = flag, errorMsg = "User Not Found" }
+        ///         
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getFolderList(int userID)
+        {
+            int flag = 0;
+            string msg = "";
+            try
+            {
+                var user = entity.User.Find(userID);
+                if(user == default)
+                {
+                    flag = 2;//该用户不存在
+                    return Json(new { Flag = flag, errorMsg = "User Not Found" });
+                }
+                else
+                {
+                    var result =
+                    (from u in entity.Favourite
+                     where u.UserId == userID
+                     select new { u.FavouriteId, u.FavouriteName, u.ArticleNum }).Distinct();
+                    //if(result == default)
+                    flag = 1;//成功
+                    return Json(new { Flag = flag, List = result });
+                }
+               
+            }
+            catch(Exception e)
+            {
+                msg = e.Message;
+                flag = 0;
+            }
+            return Json(new { Flag = flag, errorMsg = msg });
+        }
+
+        /// <summary>
+        /// 返回收藏夹内文章的具体信息【分页】
+        /// </summary>
+        /// <param name="folderID">收藏夹id</param>
+        /// <param name="pageNum">页号</param>
+        /// <param name="pageSize">每页大小</param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getFolderArticleInfo(int folderID, int pageNum, int pageSize)
+        {
+            /*var content = (from c in entity.Topic
+                           where c.UserId == int.Parse(userID)
+                           select c).OrderByDescending(c => c.TopicUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面*/
+            int flag = 0;
+            string msg = "";
+            try
+            {
+                var result =
+                (from c in entity.FavouriteArticle
+                 join right in entity.Article
+                 on c.ArticleId equals right.ArticleId
+                 where c.FavouriteId == folderID
+                 select right).Distinct().OrderByDescending(right => right.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                flag = 1;
+                return Json(new { Flag = flag, Result = result });
+            }
+            catch (Exception e)
+            {
+                msg = e.Message;
+                flag = 0;
+            }
+            return Json(new { Flag = flag, errorMsg = msg });
 
 
+
+
+
+        }
 
     }
 }

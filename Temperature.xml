@@ -1168,7 +1168,7 @@
                 
                 1：成功
                 
-                    返回：{ReturnFlag = flag, result = "successful deleted"}
+                    返回：{ ReturnFlag = flag, Item = item }
                     
                 2：没找到该用户
                 
@@ -1179,6 +1179,16 @@
                     返回：{ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" }
                     
             </remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.FavouriteController.getFolderList(System.Int32)" -->
+        <member name="M:Temperature.Controllers.FavouriteController.getFolderArticleInfo(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            返回收藏夹内文章的具体信息【分页】
+            </summary>
+            <param name="folderID">收藏夹id</param>
+            <param name="pageNum">页号</param>
+            <param name="pageSize">每页大小</param>
+            <returns></returns>
         </member>
         <member name="M:Temperature.Controllers.PhotoController.createAlbumByID(System.String,System.String,System.String)">
             <summary>
