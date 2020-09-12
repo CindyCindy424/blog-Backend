@@ -621,7 +621,6 @@ namespace Temperature.Controllers {
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
                 flag = 0;
-                
                 return Json(new { flag = flag });
             }
         }
