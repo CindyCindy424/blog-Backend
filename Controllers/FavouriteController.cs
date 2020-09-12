@@ -616,6 +616,22 @@ namespace Temperature.Controllers
         /// <param name="pageNum">页号</param>
         /// <param name="pageSize">每页大小</param>
         /// <returns></returns>
+        /// <remarks>
+        ///      返回：
+        ///      
+        ///      flag：0 未操作/出错
+        ///      
+        ///          返回：{ Flag = flag, errorMsg = msg }
+        ///         
+        ///      flag：1 成功
+        ///      
+        ///          返回：{ Flag = flag, Result = result }
+        ///          
+        ///      flag：2 该用户不存在
+        ///      
+        ///          返回：{ Flag = flag, errorMsg = "Folder Not Found" }
+        ///         
+        /// </remarks>
         [HttpPost]
         public JsonResult getFolderArticleInfo(int folderID, int pageNum, int pageSize)
         {
@@ -626,14 +642,23 @@ namespace Temperature.Controllers
             string msg = "";
             try
             {
-                var result =
+                var folder = entity.Favourite.Find(folderID);
+                if(folder == default)
+                {
+                    flag = 2;
+                    return Json(new { Flag = flag, errorMsg = "Folder Not Found" });
+                }
+                else
+                {
+                    var result =
                 (from c in entity.FavouriteArticle
                  join right in entity.Article
                  on c.ArticleId equals right.ArticleId
                  where c.FavouriteId == folderID
                  select right).Distinct().OrderByDescending(right => right.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
-                flag = 1;
-                return Json(new { Flag = flag, Result = result });
+                    flag = 1;
+                    return Json(new { Flag = flag, Result = result });
+                }
             }
             catch (Exception e)
             {

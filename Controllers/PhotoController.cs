@@ -448,7 +448,7 @@ namespace Temperature.Controllers {
                               albumTime = c.AlbumTime,
                               userId = c.UserId,
                               firstPhoto = d.PhotoAddress,
-                          }).DistinctBy(c => c.albumId).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
+                          }).Distinct().Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
 
                 getAllAlbumFlag = 1;
             }

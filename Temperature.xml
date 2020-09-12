@@ -1211,6 +1211,22 @@
             <param name="pageNum">页号</param>
             <param name="pageSize">每页大小</param>
             <returns></returns>
+            <remarks>
+                 返回：
+                 
+                 flag：0 未操作/出错
+                 
+                     返回：{ Flag = flag, errorMsg = msg }
+                    
+                 flag：1 成功
+                 
+                     返回：{ Flag = flag, Result = result }
+                     
+                 flag：2 该用户不存在
+                 
+                     返回：{ Flag = flag, errorMsg = "Folder Not Found" }
+                    
+            </remarks>
         </member>
         <member name="M:Temperature.Controllers.PhotoController.createAlbumByID(System.String,System.String,System.String)">
             <summary>
@@ -1372,7 +1388,7 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.PhotoController.getAllAlbumByID(System.String)">
+        <member name="M:Temperature.Controllers.PhotoController.getAllAlbumByPage(System.String,System.Int32,System.Int32)">
             <summary>
             获取所有相簿
             </summary>
@@ -1393,7 +1409,7 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.PhotoController.getAllPhotoByID(System.String,System.String)">
+        <member name="M:Temperature.Controllers.PhotoController.getAllPhotoByPage(System.String,System.String,System.Int32,System.Int32)">
             <summary>
             获取相簿内所有图片
             </summary>
@@ -1410,6 +1426,28 @@
             
             失败：
             flag = 0
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.PhotoController.getPhotoDetail(System.String)">
+             <summary>
+             返回图片详情
+             </summary>
+             <param name="photoID"></param>
+             <returns></returns>
+             <remarks>{
+              "photoDetail": {
+                "photoID": 16,
+                "albumID": 13,
+                "photoLikes": 16,
+                "visitNum": 0,
+                "photoUploadTime": "2020-08-31T09:58:07",
+                "userID": 1,
+                "userName": "a",
+                "avatar": null,
+                "commentNums": 3
+              },
+              "flag": 1
             }
             </remarks>
         </member>
@@ -1488,21 +1526,6 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.TopicController.createTopicAnswerByID">
-            <summary>
-            创建话题回复
-            </summary>
-            <param name="content"></param>
-            <param name="topicID"></param>
-            <param name="userID"></param>
-            <returns></returns>
-            <remarks>
-            return {
-              成功：flag = 1
-              失败：flag = 2
-            }
-            </remarks>
-        </member>
         <member name="M:Temperature.Controllers.TopicController.createTopicByID">
             <summary>
             创建话题
@@ -1513,6 +1536,21 @@
             <param name="zoneID"></param>
             <response code="200">成功</response>
             <response code="403">无法创建</response>
+            <returns></returns>
+            <remarks>
+            return {
+              成功：flag = 1
+              失败：flag = 2
+            }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.TopicController.createTopicAnswerByID">
+            <summary>
+            创建话题回复
+            </summary>
+            <param name="content"></param>
+            <param name="topicID"></param>
+            <param name="userID"></param>
             <returns></returns>
             <remarks>
             return {
