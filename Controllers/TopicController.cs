@@ -624,5 +624,65 @@ namespace Temperature.Controllers {
                 return Json(new { flag = flag });
             }
         }
+
+        /// <summary>
+        /// topicId关键字搜索
+        /// </summary>
+        /// <param name="searchContent"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///{
+        ///  "topicDetail": [
+        ///    {
+        ///      "topicTitle": "发过很多345附加复合弓",
+        ///      "topicId": 2,
+        ///      "topicContent": "22222222topic32222222222222222",
+        ///      "answerNum": 6,
+        ///      "userId": 2,
+        ///      "topicUploadTime": "2020-08-26T14:34:00",
+        ///      "zoneId": 3,
+        ///      "zoneName": "dfd"
+        ///    },
+        ///    {
+        ///      "topicTitle": "发过很多345附加复合弓",
+        ///      "topicId": 7,
+        ///      "topicContent": "1",
+        ///      "answerNum": 0,
+        ///      "userId": 2,
+        ///      "topicUploadTime": "2020-08-26T14:59:17",
+        ///      "zoneId": 3,
+        ///      "zoneName": "dfd"
+        ///    }
+        ///  ],
+        ///  "flag": 1
+        ///}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getSearchedTopic(string searchContent) {
+            int flag = 0;
+            string tt = string.Format(@"({0})", searchContent);
+
+            try {
+                var content = (from c in entity.Topic
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               where c.TopicTitle.Contains(searchContent)
+                               select new {
+                                   topicTitle = c.TopicTitle,
+                                   topicId = c.TopicId,
+                                   topicContent = c.TopicContent,
+                                   answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   topicUploadTime = c.TopicUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+                               });
+                flag = 1;
+                return Json(new { topicDetail = content, flag = flag });
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+        }
     }
 }
