@@ -556,16 +556,16 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
-        /// 获取用户收藏夹列表 （返回收藏夹id&收藏夹名和文章数）
+        /// 获取用户收藏夹列表 （返回收藏夹id 收藏夹名和文章数）
         /// </summary>
-        /// <param name="userID"></param>
+        /// <param name="userID">用户ID</param>
         /// <returns></returns>
         /// <remarks>
         ///      返回：
         ///      
         ///      flag：0 未操作/出错
         ///      
-        ///         返回：{ Flag = flag, errorMsg = msg }
+        ///          返回：{ Flag = flag, errorMsg = msg }
         ///         
         ///      flag：1 成功
         ///      
@@ -573,7 +573,7 @@ namespace Temperature.Controllers
         ///          
         ///      flag：2 该用户不存在
         ///      
-        ///         返回：{ Flag = flag, errorMsg = "User Not Found" }
+        ///          返回：{ Flag = flag, errorMsg = "User Not Found" }
         ///         
         /// </remarks>
         [HttpPost]
