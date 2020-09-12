@@ -1442,7 +1442,7 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.TopicController.createTopicAnswerByID(System.String,System.String,System.String,System.String)">
+        <member name="M:Temperature.Controllers.TopicController.createTopicAnswerByID">
             <summary>
             创建话题回复
             </summary>
@@ -1457,7 +1457,7 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.TopicController.createTopicByID(System.String,System.String,System.String,System.String)">
+        <member name="M:Temperature.Controllers.TopicController.createTopicByID">
             <summary>
             创建话题
             </summary>
