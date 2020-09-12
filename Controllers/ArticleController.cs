@@ -421,7 +421,7 @@ namespace Temperature.Controllers
 
 
         /// <summary>
-        /// 查看文章评论
+        /// 查看文章评论，分页
         /// 名为nick_name用户查看一篇题目为title的文章的所有评论
         /// </summary>
         /// <param name="nick_name"></param>
@@ -441,7 +441,7 @@ namespace Temperature.Controllers
         ///     3：没找到该文章
         /// </remarks>
         [HttpPost]
-        public JsonResult getArticleCommentByTitle(string nick_name, string title)
+        public JsonResult getArticleCommentByTitle(string nick_name, string title,int pageNum,int pageSize)
         {
             var flag = 0;
             //根据用户名找到用户ID
@@ -475,12 +475,14 @@ namespace Temperature.Controllers
                  join right in entity.User
                  on u.UserId equals right.UserId
                  where u.ArticleId == A_id
+                 orderby u.ArticleCrTime descending
                  select new { Article_cr_id = u.ArticleCrId, 
                      Article_cr_content = u.ArticleCrContent,
                      Article_id = u.ArticleId,
                      Nick_name = right.NickName, 
                      Article_cr_time = u.ArticleCrTime, 
-                     Parent_cr_id = u.ParentCrId }).OrderByDescending(u => u.Article_cr_time).Distinct();
+                     Parent_cr_id = u.ParentCrId,
+                     Avatr=right.Avatr }).Skip((pageNum-1)*pageSize).Take(pageSize);
 
             //Response.StatusCode = 200;//成功
             flag = 1;
@@ -1339,7 +1341,53 @@ namespace Temperature.Controllers
             return Json(returnJson);
         }
 
+        /// <summary>
+        /// article关键字搜索
+        /// </summary>
+        /// <param name="searchContent"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        ///     0:未操作
+        ///     1：成功
+        ///     
+        ///     返回：{Result = content,flag = flag}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getSearchedArticle(string searchContent)
+        {
+            int flag = 0;
+            string tt = string.Format(@"({0})", searchContent);
 
+            try
+            {
+                var content = (from c in entity.Article
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               where c.Title.Contains(searchContent)
+                               select new
+                               {
+                                   ArticleTitle = c.Title,
+                                   articleid = c.ArticleId,
+                                   articleContent = c.ArticleContent,
+                                   articlelike=c.ArticleLikes,
+                                   collectnum=c.CollectNum,
+                                   readnum=c.ReadNum,
+                                 //  answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   articleUploadTime = c.ArticleUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+                               });
+                flag = 1;
+                return Json(new { articleDetail = content, flag = flag });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+        }
 
 
 
