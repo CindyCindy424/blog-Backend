@@ -603,9 +603,20 @@ namespace Temperature.Controllers {
         public JsonResult getSingleTopicDetail(string topicID) {
             int flag = 0;
             try {
-                var content = entity.Topic.Single(c => c.TopicId == int.Parse(topicID));
-                flag = 1;
+                var content = (from c in entity.Topic
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               where c.TopicId == int.Parse(topicID)
+                               select new {
+                                   topicId = c.TopicId,
+                                   topicContent = c.TopicContent,
+                                   answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   topicUploadTime = c.TopicUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+                               }).FirstOrDefault();
 
+                flag = 1;
                 return Json(new { topicDetail = content, flag = flag });
             } catch(Exception e) {
                 Console.WriteLine(e.Message);
