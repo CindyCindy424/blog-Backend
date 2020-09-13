@@ -1354,7 +1354,7 @@ namespace Temperature.Controllers
         ///     返回：{Result = content,flag = flag}
         /// </remarks>
         [HttpPost]
-        public JsonResult getSearchedArticle(string searchContent)
+        public JsonResult getSearchedArticle(string searchContent,int pageNum,int pageSize)
         {
             int flag = 0;
             string tt = string.Format(@"({0})", searchContent);
@@ -1377,7 +1377,7 @@ namespace Temperature.Controllers
                                    articleUploadTime = c.ArticleUploadTime,
                                    zoneId = c.ZoneId,
                                    zoneName = d.ZoneName,
-                               });
+                               }).Skip((pageNum - 1) * pageSize).Take(pageSize);
                 flag = 1;
                 return Json(new { articleDetail = content, flag = flag });
             }
