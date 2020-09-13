@@ -913,20 +913,59 @@
                  1：成功
              </remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.getUserArticlebypage(System.Int32,System.Int32,System.Int32,System.Int32)" -->
-        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32,System.Int32)">
+        <member name="M:Temperature.Controllers.ArticleController.getpersonalArticlebypage(System.Int32,System.Int32,System.Int32)">
             <summary>
-            获取阅读量前number个文章
-            按照阅读量获取前若干文章
+            分页获取user的article
             </summary>
-            <param name="takeArticleNum"></param>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="userid"></param>
             <returns></returns>
             <remarks>
                 返回内容：
                 {
-                     flag = flag, 
-                     
-                     articless = content
+                     getFlag = getFlag,        
+                      result = contentJson
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getotherArticlebypage(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            分页获取别人的article
+            </summary>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="userId"></param>
+            <param name="authorid"></param>
+            <returns></returns>
+             <remarks>
+                返回内容：
+                {
+                     getFlag = getFlag,        
+                      result = contentJson
+                }
+                
+                flag:
+                0：未操作
+                1：成功
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32,System.Int32)">
+            <summary>
+            按阅读量获取文章
+            </summary>
+            <param name="takeArticleNum"></param>
+            <param name="userid"></param>
+            <returns></returns>
+             <remarks>
+                返回内容：
+                {
+                     getFlag = getFlag,        
+                      result = contentJson
                 }
                 
                 flag:
