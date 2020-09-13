@@ -473,7 +473,10 @@ namespace Temperature.Controllers
             var item =
                 (from u in entity.ArticleCommentReply
                  join right in entity.User
-                 on u.UserId equals right.UserId
+                 on u.UserId equals right.UserId //into UserComment
+              //   from a in UserComment
+                 join left in entity.User
+                 on u.ParentCrId equals left.UserId
                  where u.ArticleId == A_id
                  orderby u.ArticleCrTime descending
                  select new { Article_cr_id = u.ArticleCrId, 
@@ -482,8 +485,23 @@ namespace Temperature.Controllers
                      Nick_name = right.NickName, 
                      Article_cr_time = u.ArticleCrTime, 
                      Parent_cr_id = u.ParentCrId,
-                     Avatr=right.Avatr }).Skip((pageNum-1)*pageSize).Take(pageSize);
-
+                     Parent_cr_name =left.NickName,
+                     Parent_cr_avatr=left.Avatr,
+                     /*
+                      Parent_cr_name=(from c in entity.User
+                                      where c.UserId==u.ParentCrId
+                                      select c.NickName).Distinct(),
+  /*
+                      Parent_cr_avatr = (from a in entity.User
+                                        where a.UserId == u.ParentCrId
+                                        select a.Avatr),
+                      */
+                     Avatr =right.Avatr }).Skip((pageNum-1)*pageSize).Take(pageSize);
+            /*
+            commentnum = (from u in entity.ArticleCommentReply
+                          where u.ArticleId == c.ArticleId
+                          select u).Count()
+            */
             //Response.StatusCode = 200;//成功
             flag = 1;
             return Json(new { ReturnFlag = flag, Item = item });
@@ -1053,12 +1071,49 @@ namespace Temperature.Controllers
             try
             {
                 var content = (from c in entity.Article
+                               join right in entity.User
+                               on c.UserId equals right.UserId
                                where c.ZoneId == int.Parse(zoneID)
-                               select c).OrderByDescending(c => c.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
-
-                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
-                returnJson["Result"] = contentJson;
+                               orderby c.ArticleUploadTime descending
+                               select new
+                               {
+                                   ArticleId = c.ArticleId,
+                                   Title = c.Title,
+                                   UserId = c.UserId,
+                                   Nick_name = right.NickName,
+                                   Avatr = right.Avatr,
+                                   ArticleContent = c.ArticleContent,
+                                   ArticleLikes = c.ArticleLikes,
+                                   CollectNum = c.CollectNum,
+                                   ReadNum = c.ReadNum,
+                                   ArticleUploadTime = c.ArticleUploadTime,
+                                   Zoneid = c.ZoneId,
+                                   commentnum = (from u in entity.ArticleCommentReply
+                                                 where u.ArticleId == c.ArticleId
+                                                 select u).Count()
+                               }                              
+                               ).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                /*
+                from u in entity.ArticleCommentReply
+                join right in entity.User
+                on u.UserId equals right.UserId
+                where u.ArticleId == A_id
+                orderby u.ArticleCrTime descending
+                select new
+                {
+                    Article_cr_id = u.ArticleCrId,
+                    Article_cr_content = u.ArticleCrContent,
+                    Article_id = u.ArticleId,
+                    Nick_name = right.NickName,
+                    Article_cr_time = u.ArticleCrTime,
+                    Parent_cr_id = u.ParentCrId,
+                    Avatr = right.Avatr
+                }).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                */
+                //string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                //returnJson["Result"] = contentJson;
                 getArticleFlag = 1;
+                return Json(new { articleDetail = content, flag = getArticleFlag });
 
             }
             catch (Exception e)
@@ -1328,6 +1383,94 @@ namespace Temperature.Controllers
                 returnJson["Result"] = contentJson;
                 getArticleFlag = 1;
 
+            }
+            catch (Exception e)
+            {
+                getArticleFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getArticleFlag", getArticleFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 得到一个用户按照（浏览量+点赞量）前getarticleNum篇文章
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <param name="getarticleNum"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        ///     0:未操作
+        ///     1：成功
+        ///     
+        ///     返回：{Result = content,flag = getArticleFlag}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getPersonalhottestArticle(int userid,int getarticleNum)
+        {
+            int getArticleFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try
+            {
+                var content = (from c in entity.Article
+                               where c.UserId==userid
+                               orderby (c.ReadNum + c.ArticleLikes) descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
+                               select c).Take(getarticleNum);
+
+               // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+               // returnJson["Result"] = contentJson;
+                getArticleFlag = 1;
+                return Json(new { articleDetail = content, flag = getArticleFlag });
+            }
+            catch (Exception e)
+            {
+                getArticleFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getArticleFlag", getArticleFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 得到一个用户按照上传时间前getarticleNum篇文章
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <param name="getarticleNum"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        ///     0:未操作
+        ///     1：成功
+        ///     
+        ///     返回：{Result = content,flag = getArticleFlag}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getPersonalnewestArticle(int userid, int getarticleNum)
+        {
+            int getArticleFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try
+            {
+                var content = (from c in entity.Article
+                               where c.UserId == userid
+                               orderby c.ArticleUploadTime descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
+                               select c).Take(getarticleNum);
+
+                // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                // returnJson["Result"] = contentJson;
+                getArticleFlag = 1;
+                return Json(new { articleDetail = content, flag = getArticleFlag });
             }
             catch (Exception e)
             {
