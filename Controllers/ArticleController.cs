@@ -165,6 +165,7 @@ namespace Temperature.Controllers
             //  item.ArticleCrId = articlecommentID;
             item.ArticleId = A_id;
             item.ArticleCrContent = content;
+           // item.ParentCrId = -1;
             item.ArticleCrTime = DateTime.Now;
             item.UserId = id;
             entity.ArticleCommentReply.Add(item);
@@ -476,7 +477,8 @@ namespace Temperature.Controllers
                  on u.UserId equals right.UserId //into UserComment
               //   from a in UserComment
                  join left in entity.User
-                 on u.ParentCrId equals left.UserId
+                 on u.ParentCrId equals left.UserId into result
+                 from resulti in result.DefaultIfEmpty()
                  where u.ArticleId == A_id
                  orderby u.ArticleCrTime descending
                  select new { Article_cr_id = u.ArticleCrId, 
@@ -485,8 +487,8 @@ namespace Temperature.Controllers
                      Nick_name = right.NickName, 
                      Article_cr_time = u.ArticleCrTime, 
                      Parent_cr_id = u.ParentCrId,
-                     Parent_cr_name =left.NickName,
-                     Parent_cr_avatr=left.Avatr,
+                     Parent_cr_name =resulti.NickName,
+                     Parent_cr_avatr=resulti.Avatr,
                      /*
                       Parent_cr_name=(from c in entity.User
                                       where c.UserId==u.ParentCrId
@@ -1147,11 +1149,16 @@ namespace Temperature.Controllers
         ///     1：成功
         /// </remarks>
         [HttpPost]
-        public JsonResult getUserArticlebypage(int pageNum, int pageSize, string userid)
+        public JsonResult getUserArticlebypage(int pageNum, int pageSize, int userId,int authorid)
         {
             int getFlag = 0;
             Dictionary<string, string> returnJson = new Dictionary<string, string>();
             returnJson.Add("Result", "");
+            var user_name =
+                   (from c in entity.User
+                    where c.UserId ==userId
+                    select c.NickName).Distinct();
+            var username = user_name.FirstOrDefault();
 
             try
             {
@@ -1160,10 +1167,13 @@ namespace Temperature.Controllers
                 //     where u.UserId == id
                 //   select u).Distinct().Count();
                 var content = (from c in entity.Article
-                               where c.UserId == int.Parse(userid)
+                               join right in entity.User on c.UserId equals right.UserId
+                               where c.UserId == authorid
                                orderby c.ArticleUploadTime descending
                                select new
                                {
+                                   User_name=username,
+                                   authorname=right.NickName,
                                    article_id = c.ArticleId,
                                    title = c.Title,
                                    userid = c.UserId,
@@ -1175,7 +1185,7 @@ namespace Temperature.Controllers
                                    zoneid = c.ZoneId,
                                    commentnum = (from u in entity.ArticleCommentReply
                                                  where u.ArticleId == c.ArticleId
-                                                 select u).Count()//.Distinct().Count()
+                                                 select u).Count(),//.Distinct().Count(),                   
                                }).Skip((pageNum - 1) * pageSize).Take(pageSize); 
              
 
@@ -1215,17 +1225,32 @@ namespace Temperature.Controllers
         ///     1：成功
         /// </remarks>
         [HttpPost]
-        public JsonResult getArticlebyreadnum(int takeArticleNum)
+        public JsonResult getArticlebyreadnum(int takeArticleNum,int userid)
         {
             int flag = 0;
             Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            var user_name =
+                 (from c in entity.User
+                  where c.UserId == userid
+                  select c.NickName).Distinct();
+            var username = user_name.FirstOrDefault();
 
             try
             {
-                var content = entity.Article.OrderByDescending(c => c.ReadNum).Take(takeArticleNum);
+               // var content = entity.Article.OrderByDescending(c => c.ReadNum).Take(takeArticleNum);
+                var content = (from c in entity.Article
+                                join right in entity.User on c.UserId equals right.UserId
+                                //where c.UserId == authorid
+                                orderby c.ReadNum descending
+                                select new {
+                                    username,
+                                c,
+                               right.NickName
+                                }).Take(takeArticleNum);
 
-                returnJson.Add("articless", JsonConvert.SerializeObject(content));
+                 returnJson.Add("articless", JsonConvert.SerializeObject(content));
                 flag = 1;
+
             }
             catch (Exception e)
             {
