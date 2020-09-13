@@ -8,13 +8,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Temperature.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Temperature.Controllers {
-    [Authorize]
+    //[Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class PhotoController : Controller {
@@ -412,6 +413,9 @@ namespace Temperature.Controllers {
             return Json(returnJson);
         }
 
+
+        
+
         /// <summary>
         /// 获取所有相簿
         /// </summary>
@@ -435,12 +439,10 @@ namespace Temperature.Controllers {
         public ActionResult getAllAlbumByPage(string userID, int pageNum, int pageSize) {
             int getAllAlbumFlag = 0;
             IEnumerable<object> albums = null;
+            List<string> firstPhoto = new List<string>();
 
             try {
                 albums = (from e in entity.Album
-                          join d in entity.Photo on e.AlbumId equals d.AlbumId
-                          into tmps
-                          from c in tmps.DefaultIfEmpty()
                           where e.UserId == int.Parse(userID)
                           orderby e.AlbumTime descending
                           select new {
@@ -448,10 +450,17 @@ namespace Temperature.Controllers {
                               albumIntroduction = e.AlbumIntroduction,
                               albumName = e.AlbumName,
                               albumTime = e.AlbumTime,
-                              userId = e.UserId,
-                              firstPhoto = c.PhotoAddress,
-                          }).Distinct().Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
+                              userId = e.UserId
+                          }).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
 
+                //foreach(var album in albums) {
+                //    var realAlbum = (AlbumWithPhoto)album;
+                    
+                //    var photo = (from f in entity.Photo
+                //                 where f.AlbumId == 1
+                //                 select f.PhotoAddress).FirstOrDefault();
+                //    firstPhoto.Add(photo.ToString());
+                //}
                 getAllAlbumFlag = 1;
             }
             catch (Exception e) {
@@ -460,6 +469,7 @@ namespace Temperature.Controllers {
             }
             var returnJson = new {
                 albums = JsonConvert.SerializeObject(albums),
+                //firstPhoto = firstPhoto,
                 getAllAlbumFlag = getAllAlbumFlag,
             };
 
@@ -743,4 +753,13 @@ namespace Temperature.Controllers {
         }
 
     }
+}
+
+public class AlbumWithPhoto
+{
+    int albumId;
+    string albumIntroduction;
+    string albumName;
+    DateTime albumTime;
+    int userId;
 }
