@@ -970,7 +970,7 @@
                 返回：{Result = content,getArticleFlag = flag}
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.getSearchedArticle(System.String)">
+        <member name="M:Temperature.Controllers.ArticleController.getSearchedArticle(System.String,System.Int32,System.Int32)">
             <summary>
             article关键字搜索
             </summary>

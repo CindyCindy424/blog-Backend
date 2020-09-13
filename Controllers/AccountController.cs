@@ -791,6 +791,7 @@ namespace Temperature.Controllers
             {
                 uploadPaths = JsonConvert.SerializeObject(allFilePath),
                 createPhotoFlag = createPhotoFlag,
+                getmsg = msg
                 //getmsg = msg,
             };
 
