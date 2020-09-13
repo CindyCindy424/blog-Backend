@@ -913,8 +913,8 @@
                  1：成功
              </remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.getUserArticlebypage(System.Int32,System.Int32,System.String)" -->
-        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32)">
+        <!-- Badly formed XML comment ignored for member "M:Temperature.Controllers.ArticleController.getUserArticlebypage(System.Int32,System.Int32,System.Int32,System.Int32)" -->
+        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32,System.Int32)">
             <summary>
             获取阅读量前number个文章
             按照阅读量获取前若干文章
@@ -1013,6 +1013,16 @@
                 
                 返回：{Result = content,flag = flag}
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getSearchedpersonalArticle(System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            个人article关键字搜索
+            </summary>
+            <param name="searchContent"></param>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="userid"></param>
+            <returns></returns>
         </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>

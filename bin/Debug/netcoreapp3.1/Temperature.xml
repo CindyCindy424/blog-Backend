@@ -1014,6 +1014,16 @@
                 返回：{Result = content,flag = flag}
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.ArticleController.getSearchedpersonalArticle(System.String,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            个人article关键字搜索
+            </summary>
+            <param name="searchContent"></param>
+            <param name="pageNum"></param>
+            <param name="pageSize"></param>
+            <param name="userid"></param>
+            <returns></returns>
+        </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>
              新建收藏夹(禁止同一用户创建同名收藏夹）
