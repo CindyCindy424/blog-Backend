@@ -1318,27 +1318,10 @@ namespace Temperature.Controllers
                                 join right in entity.User on c.UserId equals right.UserId
                                 //where c.UserId == authorid
                                 orderby c.ReadNum descending
-                                select new 
-                                {
-                                    NickName=right.NickName,
-                                    ArticleCommentReply=c.ArticleCommentReply,
-                                    ArticleContent=c.ArticleContent,
-                                    ArticleId=c.ArticleId,
-                                    ArticleLikes=c.ArticleLikes,
-                                    ArticleRank=c.ArticleRank,
-                                    ArticleUploadTime = c.ArticleUploadTime,
-                                    ArticleVisit=c.ArticleVisit,
-                                    CollectNum=c.CollectNum,
-                                    FavouriteArticle=c.FavouriteArticle,
-                                    ReadNum=c.ReadNum,
-                                    Title=c.Title,
-                                   // User=c.User,
-                                    UserId=c.UserId,
-                                    ZoneId=c.ZoneId,
-                                    Username=username
-                                 //   username,
-                             //   c,
-                          //     right.NickName
+                                select new {
+                                    username,
+                                c,
+                               right.NickName
                                 }).Take(takeArticleNum);
 
                  returnJson.Add("articless", JsonConvert.SerializeObject(content));
