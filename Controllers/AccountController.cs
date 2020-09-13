@@ -1988,8 +1988,9 @@ namespace Temperature.Controllers
                 var userList =
                 (from u in entity.User
                  join right in entity.Article
-                 on u.UserId equals right.UserId
-                 orderby (right.ReadNum + right.ArticleLikes) descending
+                 on u.UserId equals right.UserId into result
+                 from resulti in result.DefaultIfEmpty()
+                 orderby (resulti.ReadNum + resulti.ArticleLikes) descending
                  select new { userID = u.UserId, userName = u.NickName, userAvator = u.Avatr }
                 ).Distinct().Take(10);
                 return Json(userList);
