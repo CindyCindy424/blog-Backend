@@ -1137,7 +1137,7 @@ namespace Temperature.Controllers
         /// <param name="pageSize"></param>
         /// <param name="userid"></param>
         /// <returns></returns>
-        /// remarks>
+        /// <remarks>
         ///     返回内容：
         ///     {
         ///          getFlag = getFlag,        
@@ -1149,16 +1149,16 @@ namespace Temperature.Controllers
         ///     1：成功
         /// </remarks>
         [HttpPost]
-        public JsonResult getUserArticlebypage(int pageNum, int pageSize, int userId,int authorid)
+        public JsonResult getpersonalArticlebypage(int pageNum, int pageSize, int userId)
         {
             int getFlag = 0;
             Dictionary<string, string> returnJson = new Dictionary<string, string>();
             returnJson.Add("Result", "");
-            var user_name =
-                   (from c in entity.User
-                    where c.UserId ==userId
-                    select c.NickName).Distinct();
-            var username = user_name.FirstOrDefault();
+         //   var user_name =
+          //         (from c in entity.User
+         //           where c.UserId ==userId
+         //           select c.NickName).Distinct();
+         //   var username = user_name.FirstOrDefault();
 
             try
             {
@@ -1168,12 +1168,12 @@ namespace Temperature.Controllers
                 //   select u).Distinct().Count();
                 var content = (from c in entity.Article
                                join right in entity.User on c.UserId equals right.UserId
-                               where c.UserId == authorid
+                               where c.UserId == userId
                                orderby c.ArticleUploadTime descending
                                select new
                                {
-                                   User_name=username,
-                                   authorname=right.NickName,
+                                   User_name=right.NickName,
+                                  // authorname=right.NickName,
                                    article_id = c.ArticleId,
                                    title = c.Title,
                                    userid = c.UserId,
@@ -1207,17 +1207,93 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
-        /// 获取阅读量前number个文章
-        /// 按照阅读量获取前若干文章
+        /// 分页获取别人的article
         /// </summary>
-        /// <param name="takeArticleNum"></param>
+        /// <param name="pageNum"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="userId"></param>
+        /// <param name="authorid"></param>
         /// <returns></returns>
-        /// <remarks>
+        ///  <remarks>
         ///     返回内容：
         ///     {
-        ///          flag = flag, 
-        ///          
-        ///          articless = content
+        ///          getFlag = getFlag,        
+        ///           result = contentJson
+        ///     }
+        ///     
+        ///     flag:
+        ///     0：未操作
+        ///     1：成功
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getotherArticlebypage(int pageNum, int pageSize, int userId, int authorid)
+        {
+            int getFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+            var user_name =
+                   (from c in entity.User
+                    where c.UserId == userId
+                    select c.NickName).Distinct();
+            var username = user_name.FirstOrDefault();
+
+            try
+            {
+                // var ArticleCnt =
+                //      (from u in entity.Article
+                //     where u.UserId == id
+                //   select u).Distinct().Count();
+                var content = (from c in entity.Article
+                               join right in entity.User on c.UserId equals right.UserId
+                               where c.UserId == authorid
+                               orderby c.ArticleUploadTime descending
+                               select new
+                               {
+                                   User_name = username,
+                                   authorname = right.NickName,
+                                   article_id = c.ArticleId,
+                                   title = c.Title,
+                                   userid = c.UserId,
+                                   articlcontent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   uploadtime = c.ArticleUploadTime,
+                                   zoneid = c.ZoneId,
+                                   commentnum = (from u in entity.ArticleCommentReply
+                                                 where u.ArticleId == c.ArticleId
+                                                 select u).Count(),//.Distinct().Count(),                   
+                               }).Skip((pageNum - 1) * pageSize).Take(pageSize);
+
+
+                string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                returnJson["Result"] = contentJson;
+                getFlag = 1;
+
+            }
+            catch (Exception e)
+            {
+                getFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getFlag", getFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 按阅读量获取文章
+        /// </summary>
+        /// <param name="takeArticleNum"></param>
+        /// <param name="userid"></param>
+        /// <returns></returns>
+        ///  <remarks>
+        ///     返回内容：
+        ///     {
+        ///          getFlag = getFlag,        
+        ///           result = contentJson
         ///     }
         ///     
         ///     flag:
@@ -1242,10 +1318,27 @@ namespace Temperature.Controllers
                                 join right in entity.User on c.UserId equals right.UserId
                                 //where c.UserId == authorid
                                 orderby c.ReadNum descending
-                                select new {
-                                    username,
-                                c,
-                               right.NickName
+                                select new 
+                                {
+                                    NickName=right.NickName,
+                                    ArticleCommentReply=c.ArticleCommentReply,
+                                    ArticleContent=c.ArticleContent,
+                                    ArticleId=c.ArticleId,
+                                    ArticleLikes=c.ArticleLikes,
+                                    ArticleRank=c.ArticleRank,
+                                    ArticleUploadTime = c.ArticleUploadTime,
+                                    ArticleVisit=c.ArticleVisit,
+                                    CollectNum=c.CollectNum,
+                                    FavouriteArticle=c.FavouriteArticle,
+                                    ReadNum=c.ReadNum,
+                                    Title=c.Title,
+                                   // User=c.User,
+                                    UserId=c.UserId,
+                                    ZoneId=c.ZoneId,
+                                    Username=username
+                                 //   username,
+                             //   c,
+                          //     right.NickName
                                 }).Take(takeArticleNum);
 
                  returnJson.Add("articless", JsonConvert.SerializeObject(content));
