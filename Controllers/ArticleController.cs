@@ -1557,7 +1557,50 @@ namespace Temperature.Controllers
             }
         }
 
+        /// <summary>
+        /// 个人article关键字搜索
+        /// </summary>
+        /// <param name="searchContent"></param>
+        /// <param name="pageNum"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="userid"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getSearchedpersonalArticle(string searchContent, int pageNum, int pageSize,int userid)
+        {
+            int flag = 0;
+            string tt = string.Format(@"({0})", searchContent);
 
+            try
+            {
+                var content = (from c in entity.Article
+                               where c.UserId==userid
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               where c.Title.Contains(searchContent)
+                               select new
+                               {
+                                   ArticleTitle = c.Title,
+                                   articleid = c.ArticleId,
+                                   articleContent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   //  answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   articleUploadTime = c.ArticleUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+                               }).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                flag = 1;
+                return Json(new { articleDetail = content, flag = flag });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+        }
 
     }
 
