@@ -810,7 +810,7 @@
         </member>
         <member name="M:Temperature.Controllers.ArticleController.addArticleLikeByTitle(System.String,System.String)">
             <summary>
-            articlelikes加一
+            articlelikes加一 【修改后：每个user每篇文章只能点赞一次】
             </summary>
             <param name="nick_name"></param>
             <param name="title"></param>
@@ -819,7 +819,7 @@
                 返回内容：
                 {
                       ReturnFlag = flag, 
-                      result = "successful"
+                      result = "successful"/"NOT FOUND" /"already Liked" 
                 }
                 
                 flag:
@@ -827,6 +827,7 @@
                 1：成功
                 2：没有找到该用户
                 3：没找到该文章
+                4：该用户已经对该篇文章点赞过  【新加】
             </remarks>
         </member>
         <member name="M:Temperature.Controllers.ArticleController.addArticleCollectByTitle(System.String,System.String)">
@@ -1043,6 +1044,20 @@
             得到一个用户按照上传时间前getarticleNum篇文章
             </summary>
             <param name="userid"></param>
+            <param name="getarticleNum"></param>
+            <returns></returns>
+            <remarks>
+                flag:
+                0:未操作
+                1：成功
+                
+                返回：{Result = content,flag = getArticleFlag}
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getnewestArticle(System.Int32)">
+            <summary>
+            得到最新上传的前getarticleNum篇文章
+            </summary>
             <param name="getarticleNum"></param>
             <returns></returns>
             <remarks>

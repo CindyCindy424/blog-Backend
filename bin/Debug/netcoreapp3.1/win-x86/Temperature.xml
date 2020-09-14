@@ -1053,6 +1053,20 @@
                 返回：{Result = content,flag = getArticleFlag}
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.ArticleController.getnewestArticle(System.Int32)">
+            <summary>
+            得到最新上传的前getarticleNum篇文章
+            </summary>
+            <param name="getarticleNum"></param>
+            <returns></returns>
+            <remarks>
+                flag:
+                0:未操作
+                1：成功
+                
+                返回：{Result = content,flag = getArticleFlag}
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.getSearchedArticle(System.String,System.Int32,System.Int32)">
             <summary>
             article关键字搜索

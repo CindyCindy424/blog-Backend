@@ -806,7 +806,7 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
-        /// articlelikes加一
+        /// articlelikes加一 【修改后：每个user每篇文章只能点赞一次】
         /// </summary>
         /// <param name="nick_name"></param>
         /// <param name="title"></param>
@@ -815,7 +815,7 @@ namespace Temperature.Controllers
         ///     返回内容：
         ///     {
         ///           ReturnFlag = flag, 
-        ///           result = "successful"
+        ///           result = "successful"/"NOT FOUND" /"already Liked" 
         ///     }
         ///     
         ///     flag:
@@ -823,6 +823,7 @@ namespace Temperature.Controllers
         ///     1：成功
         ///     2：没有找到该用户
         ///     3：没找到该文章
+        ///     4：该用户已经对该篇文章点赞过  【新加】
         /// </remarks>
         [HttpPost]
         public JsonResult addArticleLikeByTitle(string nick_name, string title)
@@ -854,14 +855,34 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, articleID = A_id, result = "NOT FOUND" });
             }
 
-            var info = entity.Article.Find(A_id);
-            info.ArticleLikes++;
-            entity.Entry(info).State = EntityState.Modified;
-            entity.SaveChanges();
+            string userID = id.ToString();
+            //检查之前是否点赞过
+            var checkItem = entity.ArticleRank.Find(userID, A_id);
+            if(checkItem == default)     //没有点赞过,正常进行点赞
+            {
+                //修改文章表的articleLikes属性
+                var info = entity.Article.Find(A_id);
+                info.ArticleLikes++;
+                entity.Entry(info).State = EntityState.Modified;
+                entity.SaveChanges();
 
-            //Response.StatusCode = 200;//成功
-            flag = 1;
-            return Json(new { ReturnFlag = flag, result = "successful" });
+                //修改点赞记录表(article_rank)
+                var record = new ArticleRank();
+                record.ArticleId = A_id;
+                record.ArticleRank1 = userID;
+                record.ArticleRankDate = DateTime.Now;
+                entity.ArticleRank.Add(record);
+                entity.SaveChanges();
+                flag = 1;
+                return Json(new { ReturnFlag = flag, result = "successful" });
+            }
+            else  //已经被点赞
+            {
+                //拒绝该请求
+                flag = 4;
+                return Json(new { ReturnFlag = flag, result = "already Liked" });
+            }
+            
         }
 
         /// <summary>

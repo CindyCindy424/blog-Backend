@@ -224,7 +224,7 @@ namespace Temperature.Models
 
             modelBuilder.Entity<ArticleRank>(entity =>
             {
-                entity.HasKey(e => new { e.ArticleRankDate, e.ArticleRankTime, e.ArticleRankType, e.ArticleRank1 })
+                entity.HasKey(e => new { e.ArticleRank1, e.ArticleId })
                     .HasName("PRIMARY");
 
                 entity.ToTable("article_rank");
@@ -258,7 +258,7 @@ namespace Temperature.Models
 
             modelBuilder.Entity<ArticleVisit>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.ArticleId })
+                entity.HasKey(e => new { e.UserId, e.ArticleId,e.ArticleVisitTime })
                     .HasName("PRIMARY");
 
                 entity.ToTable("article_visit");
