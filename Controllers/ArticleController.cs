@@ -1689,6 +1689,69 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
+        /// 得到最新上传的前getarticleNum篇文章
+        /// </summary>
+        /// <param name="getarticleNum"></param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     flag:
+        ///     0:未操作
+        ///     1：成功
+        ///     
+        ///     返回：{Result = content,flag = getArticleFlag}
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getnewestArticle(int getarticleNum)
+        {
+            int getArticleFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+
+            try
+            {
+                var content = (from c in entity.Article
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               join e in entity.User on c.UserId equals e.UserId
+                               orderby c.ArticleUploadTime descending
+                               //  where c.Title.Contains(searchContent)
+                               select new
+                               {
+                                   nickname = e.NickName,
+                                   avatr = e.Avatr,
+                                   ArticleTitle = c.Title,
+                                   articleid = c.ArticleId,
+                                   articleContent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   //  answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   articleUploadTime = c.ArticleUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+
+                                   //where c.UserId == userid
+                               }
+                               ).Take(getarticleNum);
+
+                // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
+                // returnJson["Result"] = contentJson;
+                getArticleFlag = 1;
+                return Json(new { articleDetail = content, flag = getArticleFlag });
+            }
+            catch (Exception e)
+            {
+                getArticleFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getArticleFlag", getArticleFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
         /// article关键字搜索
         /// </summary>
         /// <param name="searchContent"></param>
