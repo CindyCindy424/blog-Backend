@@ -663,7 +663,7 @@ namespace Temperature.Controllers {
         ///  "flag": 1
         ///}
         /// </remarks>
-        /// [HttpPost]
+        [HttpPost]
         public JsonResult getSearchedTopic(string searchContent, int pageNum, int pageSize)
         {
             int flag = 0;

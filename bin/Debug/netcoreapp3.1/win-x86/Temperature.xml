@@ -961,7 +961,14 @@
                 1：成功
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32,System.Int32)">
+        <member name="M:Temperature.Controllers.ArticleController.getcommentNumbytitle(System.String)">
+            <summary>
+            得到文章评论数
+            </summary>
+            <param name="title"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Temperature.Controllers.ArticleController.getArticlebyreadnum(System.Int32)">
             <summary>
             按阅读量获取文章
             </summary>
@@ -1850,7 +1857,7 @@
             }
              </remarks>
         </member>
-        <member name="M:Temperature.Controllers.TopicController.getSearchedTopic(System.String)">
+        <member name="M:Temperature.Controllers.TopicController.getSearchedTopic(System.String,System.Int32,System.Int32)">
              <summary>
              topicId关键字搜索
              </summary>
