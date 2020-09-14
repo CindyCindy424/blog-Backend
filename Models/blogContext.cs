@@ -337,7 +337,7 @@ namespace Temperature.Models
 
             modelBuilder.Entity<MessageLibrary>(entity =>
             {
-                entity.HasKey(e => e.MessageId)
+                entity.HasKey(e => new { e.MessageId, e.MessageType })
                     .HasName("PRIMARY");
 
                 entity.ToTable("message_library");
@@ -374,10 +374,10 @@ namespace Temperature.Models
                     .HasColumnName("READ_STATE")
                     .HasColumnType("tinyint(1)");
 
-                entity.HasOne(d => d.Message)
+                /*entity.HasOne(d => d.Message)
                     .WithMany(p => p.MessageReceive)
                     .HasForeignKey(d => d.MessageId)
-                    .HasConstraintName("message_receive_ibfk_2");
+                    .HasConstraintName("message_receive_ibfk_2");*/
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.MessageReceive)
@@ -403,10 +403,10 @@ namespace Temperature.Models
                     .HasColumnName("RECEIVE_STATE")
                     .HasColumnType("tinyint(1)");
 
-                entity.HasOne(d => d.Message)
+                /*entity.HasOne(d => d.Message)
                     .WithMany(p => p.MessageSend)
                     .HasForeignKey(d => d.MessageId)
-                    .HasConstraintName("message_send_ibfk_2");
+                    .HasConstraintName("message_send_ibfk_2");*/
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.MessageSend)
