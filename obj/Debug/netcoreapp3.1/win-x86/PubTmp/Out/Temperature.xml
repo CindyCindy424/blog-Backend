@@ -752,6 +752,13 @@
                 3：没找到该文章
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.ArticleController.getparentCRByID(System.Int32)">
+            <summary>
+            返回父评论信息
+            </summary>
+            <param name="parentid"></param>
+            <returns></returns>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.getArticleRankByTitle(System.String,System.String)">
             <summary>
             获取文章浏览排行

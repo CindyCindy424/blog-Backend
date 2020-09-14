@@ -663,7 +663,39 @@ namespace Temperature.Controllers {
         ///  "flag": 1
         ///}
         /// </remarks>
-        [HttpPost]
+        /// [HttpPost]
+        public JsonResult getSearchedTopic(string searchContent, int pageNum, int pageSize)
+        {
+            int flag = 0;
+            string tt = string.Format(@"({0})", searchContent);
+
+            try
+            {
+                var content = (from c in entity.Topic
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               where c.TopicTitle.Contains(searchContent)
+                               select new
+                               {
+                                   topicTitle = c.TopicTitle,
+                                   topicId = c.TopicId,
+                                   topicContent = c.TopicContent,
+                                   answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   topicUploadTime = c.TopicUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+                               }).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                flag = 1;
+                return Json(new { topicDetail = content, flag = flag });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+        }
+        /*[HttpPost]
         public JsonResult getSearchedTopic(string searchContent) {
             int flag = 0;
             string tt = string.Format(@"({0})", searchContent);
@@ -689,6 +721,6 @@ namespace Temperature.Controllers {
                 flag = 0;
                 return Json(new { flag = flag });
             }
-        }
+        }*/
     }
 }
