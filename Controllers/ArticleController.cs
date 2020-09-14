@@ -655,16 +655,22 @@ namespace Temperature.Controllers
         /// <param name="parentid"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult getparentCRByID(int parentid)
+        public JsonResult getparentCRByID(int articleCRid)
         {
             var flag = 0;
- 
+            var parentid =
+                   (from c in entity.ArticleCommentReply
+                    where c.ArticleCrId == articleCRid
+                    select c.ParentCrId).Distinct();
+            var id = parentid.FirstOrDefault();
+
             var item =
                 (from u in entity.ArticleCommentReply
                 join right in entity.User on u.UserId equals right.UserId
-                 where u.UserId == parentid
+                 where u.ArticleCrId == id
                  select new 
                  {
+                     parentid=id,
                   parent_name=right.NickName,
                  content=u.ArticleCrContent,
                  avatr=right.Avatr
