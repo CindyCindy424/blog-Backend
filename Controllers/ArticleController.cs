@@ -660,11 +660,17 @@ namespace Temperature.Controllers
             var flag = 0;
  
             var item =
-                (from u in entity.User
-                 
-                // on u.UserId equals right.UserId
+                (from u in entity.ArticleCommentReply
+                join right in entity.User on u.UserId equals right.UserId
                  where u.UserId == parentid
-                 select u).Distinct();
+                 select new 
+                 {
+                  parent_name=right.NickName,
+                 content=u.ArticleCrContent,
+                 avatr=right.Avatr
+                 }
+
+                 ).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;
@@ -1306,6 +1312,51 @@ namespace Temperature.Controllers
         }
 
         /// <summary>
+        /// 得到文章评论数
+        /// </summary>
+        /// <param name="title"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getcommentNumbytitle(string title)
+        {
+            int getFlag = 0;
+            Dictionary<string, string> returnJson = new Dictionary<string, string>();
+            returnJson.Add("Result", "");
+            var articleid =
+                   (from c in entity.Article
+                    where c.Title == title
+                    select c.ArticleId).Distinct();
+            var A_id = articleid.FirstOrDefault();
+
+            try
+            {
+                // var ArticleCnt =
+                //      (from u in entity.Article
+                //     where u.UserId == id
+                //   select u).Distinct().Count();
+                var commentnum = (from u in entity.ArticleCommentReply
+                                  where u.ArticleId == A_id
+                                  select u).Count();//.Distinct().Count(),                   
+                             
+
+               // string contentJson = JsonConvert.SerializeObject(commentnum); //序列化对象
+                //returnJson["Result"] = contentJson;
+                getFlag = 1;
+                return Json(new { commentNUM =commentnum, flag = getFlag });
+            }
+            catch (Exception e)
+            {
+                getFlag = 0;
+
+            }
+            finally
+            {
+                returnJson.Add("getFlag", getFlag.ToString());
+            }
+            return Json(returnJson);
+        }
+
+        /// <summary>
         /// 按阅读量获取文章
         /// </summary>
         /// <param name="takeArticleNum"></param>
@@ -1323,49 +1374,62 @@ namespace Temperature.Controllers
         ///     1：成功
         /// </remarks>
         [HttpPost]
-        public JsonResult getArticlebyreadnum(int takeArticleNum,int userid)
+        public JsonResult getArticlebyreadnum(int takeArticleNum)
         {
             int flag = 0;
-            Dictionary<string, string> returnJson = new Dictionary<string, string>();
-            var user_name =
-                 (from c in entity.User
-                  where c.UserId == userid
-                  select c.NickName).Distinct();
-            var username = user_name.FirstOrDefault();
+           Dictionary<string, string> returnJson = new Dictionary<string, string>();
+         
 
             try
             {
-               // var content = entity.Article.OrderByDescending(c => c.ReadNum).Take(takeArticleNum);
+                // var content = entity.Article.OrderByDescending(c => c.ReadNum).Take(takeArticleNum);
                 var content = (from c in entity.Article
-                                join right in entity.User on c.UserId equals right.UserId
+                               join right in entity.User on c.UserId equals right.UserId
+                            //   where c.UserId == authorid
+                               orderby c.ReadNum descending
+                               select new
+                               {
+                                  // User_name = username,
+                                   authorname = right.NickName,
+                                   article_id = c.ArticleId,
+                                   title = c.Title,
+                                   userid = c.UserId,
+                                   articlcontent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   uploadtime = c.ArticleUploadTime,
+                                   zoneid = c.ZoneId,
+                                  // commentnum = (from u in entity.ArticleCommentReply
+                                   //              where u.ArticleId == c.ArticleId
+                                   //              select u).Count(),//.Distinct().Count(),                   
+                               }).Take(takeArticleNum);
+              /*  var content = (from c in entity.Article
+                               // join right in entity.User on c.UserId equals right.UserId
                                 //where c.UserId == authorid
                                 orderby c.ReadNum descending
                                 select new 
-                                {
-                                    NickName=right.NickName,
-                                    ArticleCommentReply=c.ArticleCommentReply,
-                                    ArticleContent=c.ArticleContent,
-                                    ArticleId=c.ArticleId,
-                                    ArticleLikes=c.ArticleLikes,
-                                    ArticleRank=c.ArticleRank,
-                                    ArticleUploadTime = c.ArticleUploadTime,
-                                    ArticleVisit=c.ArticleVisit,
-                                    CollectNum=c.CollectNum,
-                                    FavouriteArticle=c.FavouriteArticle,
-                                    ReadNum=c.ReadNum,
-                                    Title=c.Title,
-                                   // User=c.User,
-                                    UserId=c.UserId,
-                                    ZoneId=c.ZoneId,
-                                    Username=username
-                                 //   username,
-                             //   c,
-                          //     right.NickName
-                                }).Take(takeArticleNum);
-
-                 returnJson.Add("articless", JsonConvert.SerializeObject(content));
+                               // {
+                                 //   right.NickName,
+                                    t=c.ArticleCommentReply,
+                                 //   c.ArticleContent,
+                                 //   c.ArticleId,
+                                //    c.ArticleLikes,
+                                //    c.ArticleRank,
+                                //    c.ArticleUploadTime,
+                                //    c.ArticleVisit,
+                                //    c.CollectNum,
+                                 //   c.FavouriteArticle,
+                                //    c.ReadNum,
+                                //    c.Title,
+                                //    c.UserId,
+                                //    c.ZoneId                           
+                             //   }
+                                ).Take(takeArticleNum);
+            */
+                // returnJson.Add("articless", JsonConvert.SerializeObject(content));
                 flag = 1;
-
+                return Json(new { articleDetail = content, flag = flag });
             }
             catch (Exception e)
             {
