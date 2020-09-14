@@ -472,13 +472,21 @@ namespace Temperature.Controllers
             }
 
             var item =
-                (from u in entity.ArticleCommentReply
+                (/*from u in entity.ArticleCommentReply
                  join right in entity.User
                  on u.UserId equals right.UserId //into UserComment
-              //   from a in UserComment
-               //  join left in entity.User
-              //   on u.ParentCrId equals left.UserId into result
-               //  from resulti in result.DefaultIfEmpty()
+                 //from a in UserComment
+                 join left in entity.User
+                 on u.ParentCrId equals left.UserId into result
+                 from resulti in result.DefaultIfEmpty()*/
+
+                from u in entity.ArticleCommentReply
+                join right in entity.User on u.UserId equals right.UserId  //查出本条评论的用户
+                join second in entity.ArticleCommentReply on u.ParentCrId equals second.ArticleCrId into resultOne  //第一层
+                from x in resultOne.DefaultIfEmpty()
+                join three in entity.User on x.UserId equals three.UserId into resultTwo
+                from y in resultTwo.DefaultIfEmpty()
+
                  where u.ArticleId == A_id
                  orderby u.ArticleCrTime descending
                  select new { Article_cr_id = u.ArticleCrId, 
@@ -487,8 +495,8 @@ namespace Temperature.Controllers
                      Nick_name = right.NickName, 
                      Article_cr_time = u.ArticleCrTime, 
                      Parent_cr_id = u.ParentCrId,
-                    // Parent_cr_name =resulti.NickName,
-                   //  Parent_cr_avatr=resulti.Avatr,
+                     Parent_cr_name =y.NickName,
+                     Parent_cr_avatr=y.Avatr,
                      /*
                       Parent_cr_name=(from c in entity.User
                                       where c.UserId==u.ParentCrId
