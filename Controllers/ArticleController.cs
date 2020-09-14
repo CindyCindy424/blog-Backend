@@ -476,9 +476,9 @@ namespace Temperature.Controllers
                  join right in entity.User
                  on u.UserId equals right.UserId //into UserComment
               //   from a in UserComment
-                 join left in entity.User
-                 on u.ParentCrId equals left.UserId into result
-                 from resulti in result.DefaultIfEmpty()
+               //  join left in entity.User
+              //   on u.ParentCrId equals left.UserId into result
+               //  from resulti in result.DefaultIfEmpty()
                  where u.ArticleId == A_id
                  orderby u.ArticleCrTime descending
                  select new { Article_cr_id = u.ArticleCrId, 
@@ -487,8 +487,8 @@ namespace Temperature.Controllers
                      Nick_name = right.NickName, 
                      Article_cr_time = u.ArticleCrTime, 
                      Parent_cr_id = u.ParentCrId,
-                     Parent_cr_name =resulti.NickName,
-                     Parent_cr_avatr=resulti.Avatr,
+                    // Parent_cr_name =resulti.NickName,
+                   //  Parent_cr_avatr=resulti.Avatr,
                      /*
                       Parent_cr_name=(from c in entity.User
                                       where c.UserId==u.ParentCrId
@@ -649,6 +649,28 @@ namespace Temperature.Controllers
 
         }
 
+        /// <summary>
+        /// 返回父评论信息
+        /// </summary>
+        /// <param name="parentid"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getparentCRByID(int parentid)
+        {
+            var flag = 0;
+ 
+            var item =
+                (from u in entity.User
+                 
+                // on u.UserId equals right.UserId
+                 where u.UserId == parentid
+                 select u).Distinct();
+
+            //Response.StatusCode = 200;//成功
+            flag = 1;
+            return Json(new { ReturnFlag = flag, Item = item });
+
+        }
 
         /// <summary>
         /// 获取文章浏览排行
