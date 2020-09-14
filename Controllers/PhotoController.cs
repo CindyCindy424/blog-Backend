@@ -502,7 +502,7 @@ namespace Temperature.Controllers {
             try {
                 photos = (from c in entity.Photo
                           where c.AlbumId == int.Parse(albumID)
-                          select c).OrderByDescending(c => c.PhotoUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面;
+                          select c).OrderBy(c => c.PhotoUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面;
 
                 AlbumVisit albumVisit = new AlbumVisit();
                 albumVisit.AlbumId = int.Parse(albumID);
@@ -727,11 +727,26 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpGet]
-        public ActionResult setPhotoLike(string photoID) {
+        public ActionResult setPhotoLike(string photoID, string userID)
+        {
             int setPhotoLikeFlag = 0;
             int likes = 0;
 
-            try {
+            try
+            {
+                var hasSetLike = (from c in entity.MessageLibrary
+                                  where c.MessageId == int.Parse(photoID)
+                                  select c).FirstOrDefault();
+                if (hasSetLike != null && hasSetLike.MessageType == userID)
+                    return Json(new { setPhotoLikeFlag = 1, hasSetLike = 1 });
+
+                //新建点赞记录
+                var record = new MessageLibrary();
+                record.MessageId = int.Parse(photoID);
+                record.MessageType = userID;
+                entity.MessageLibrary.Add(record);
+                entity.SaveChanges();
+
                 var photo = entity.Photo.Single(c => c.PhotoId == int.Parse(photoID));
                 photo.PhotoLikes += 1;
                 likes = (int)photo.PhotoLikes;
@@ -740,16 +755,54 @@ namespace Temperature.Controllers {
 
                 setPhotoLikeFlag = 1;
 
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 setPhotoLikeFlag = 0;
             }
-            var returnJson = new {
+            var returnJson = new
+            {
                 photoID = photoID,
                 photoLikes = likes,
                 setPhotoLikeFlag = setPhotoLikeFlag,
             };
             return Json(returnJson);
+        }
+
+        /// <summary>
+        /// 返回用户是否点赞
+        /// 1为已点赞 2为未点赞
+        /// </summary>
+        /// <param name="photoID"></param>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult checkPhotoLike(string photoID, string userID)
+        {
+            int flag = 0;
+
+            try
+            {
+                var hasSetLike = entity.MessageLibrary.Single(c => c.MessageId == int.Parse(photoID));
+                if (hasSetLike.MessageType == userID)
+                {
+                    flag = 1;
+                    return Json(new { flag = flag, hasSetLike = 1 });
+                }
+                else
+                {
+                    flag = 0;
+                    return Json(new { flag = flag, hasSetLike = 0 });
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+                return Json(new { flag = flag });
+            }
+
         }
 
     }

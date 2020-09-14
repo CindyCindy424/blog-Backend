@@ -1614,7 +1614,7 @@
             }
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.PhotoController.setPhotoLike(System.String)">
+        <member name="M:Temperature.Controllers.PhotoController.setPhotoLike(System.String,System.String)">
             <summary>
             图片点赞量更新
             </summary>
@@ -1633,6 +1633,15 @@
             flag = 0
             }
             </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.PhotoController.checkPhotoLike(System.String,System.String)">
+            <summary>
+            返回用户是否点赞
+            1为已点赞 2为未点赞
+            </summary>
+            <param name="photoID"></param>
+            <param name="userID"></param>
+            <returns></returns>
         </member>
         <member name="M:Temperature.Controllers.TopicController.createTopicByID">
             <summary>
