@@ -1710,9 +1710,29 @@ namespace Temperature.Controllers
             try
             {
                 var content = (from c in entity.Article
+                               join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               join e in entity.User on c.UserId equals e.UserId
+                               orderby c.ArticleUploadTime descending
+                               //  where c.Title.Contains(searchContent)
+                               select new
+                               {
+                                   nickname = e.NickName,
+                                   avatr = e.Avatr,
+                                   ArticleTitle = c.Title,
+                                   articleid = c.ArticleId,
+                                   articleContent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   //  answerNum = c.AnswerNum,
+                                   userId = c.UserId,
+                                   articleUploadTime = c.ArticleUploadTime,
+                                   zoneId = c.ZoneId,
+                                   zoneName = d.ZoneName,
+
                                    //where c.UserId == userid
-                               orderby c.ArticleUploadTime descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
-                               select c).Take(getarticleNum);
+                               }
+                               ).Take(getarticleNum);
 
                 // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                 // returnJson["Result"] = contentJson;
