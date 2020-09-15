@@ -466,7 +466,7 @@ namespace Temperature.Controllers {
                     var photo = (from f in entity.Photo
                                  where f.AlbumId == id
                                  select f.PhotoAddress).FirstOrDefault();
-                    if (photo == null) firstPhoto.Add("#");
+                    if (photo == null) firstPhoto.Add("BlogPics\\album\\defaultAlbumPhoto.jpg");
                     else firstPhoto.Add(photo.ToString());
                 }
                 getAllAlbumFlag = 1;

@@ -588,7 +588,7 @@
                 
             </remarks>
         </member>
-        <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName(System.String,System.String,System.String,System.Int32)">
+        <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName">
             <summary>
             创建文章
             创建文章名为nick_name用户创建一篇题目为title内容为content的文章
