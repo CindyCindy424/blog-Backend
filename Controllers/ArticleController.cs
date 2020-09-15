@@ -82,7 +82,8 @@ namespace Temperature.Controllers
             }
 
             //Zone里面更新文章数量
-            var zone = entity.Zone.Find(zoneid);
+            var zoneID = int.Parse(zoneid);
+            var zone = entity.Zone.Find(zoneID);
             var num = zone.ZoneArticleNum;
             if (num == default)
                 zone.ZoneArticleNum = 1;
