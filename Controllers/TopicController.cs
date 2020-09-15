@@ -14,7 +14,7 @@ using Temperature.Models;
 
 
 namespace Temperature.Controllers {
-    [Authorize]
+    //[Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     public class TopicController : Controller {
@@ -61,10 +61,19 @@ namespace Temperature.Controllers {
                 topic.TopicUploadTime = dateTime;
                 topic.ZoneId = int.Parse(zoneID);
 
+                var zoneContent = (from c in entity.Zone
+                                   where c.ZoneId == int.Parse(zoneID)
+                                   select c).FirstOrDefault();
+                zoneContent.ZoneTopicNum += 1;
+                entity.Zone.Update(zoneContent);
+                entity.SaveChanges();
+
                 entity.Add(topic);
                 createTopicFlag = entity.SaveChanges(); //存入数据库 返回值为1表示成功
                 entity.Entry(topic);
                 createTopicFlag = 1;
+
+
 
                 return Json(new { topicDetail = topic, createTopicFlag = createTopicFlag });
             }

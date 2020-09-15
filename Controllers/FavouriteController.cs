@@ -113,6 +113,7 @@ namespace Temperature.Controllers
                      where c.NickName == nick_name
                      select c.UserId).Distinct();
             var id = userid.FirstOrDefault();
+            string msg = "";
             if (id == default)
             {
                 flag = 2;
@@ -132,43 +133,54 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, folderID = F_id, result = "NOT FOUND" });
             }
 
-            //FAVOURITE里面更新收藏夹文章数量
-            var folder = entity.Favourite.Find(F_id);
-            var num = folder.ArticleNum;
-            if (num == default)
-                folder.ArticleNum = 1;
-            else
-                folder.ArticleNum = num + 1;
-            entity.Entry(folder).State = EntityState.Modified;
-            //entity.SaveChanges();
-
-            //ARTICLE表里面更新文章收藏量
-            var article = entity.Article.Find(articleID);
-            if(article ==default)
+            try
             {
-                //Response.StatusCode = 400;//没有该文章
-                flag = 4;
-                return Json(new { ReturnFlag = flag, ArticleID = articleID, result = "Article NOT FOUND!" });
+                //FAVOURITE里面更新收藏夹文章数量
+                var folder = entity.Favourite.Find(F_id);
+                var num = folder.ArticleNum;
+                if (num == default)
+                    folder.ArticleNum = 1;
+                else
+                    folder.ArticleNum = num + 1;
+                entity.Entry(folder).State = EntityState.Modified;
+                //entity.SaveChanges();
+
+                //ARTICLE表里面更新文章收藏量
+                var article = entity.Article.Find(articleID);
+                if (article == default)
+                {
+                    //Response.StatusCode = 400;//没有该文章
+                    flag = 4;
+                    return Json(new { ReturnFlag = flag, ArticleID = articleID, result = "Article NOT FOUND!" });
+                }
+                var collectNum = article.CollectNum;
+                if (collectNum == default)
+                    article.CollectNum = 1;
+                else
+                    article.CollectNum = collectNum + 1;
+                entity.Entry(article).State = EntityState.Modified;
+                //entity.SaveChanges();
+
+                //加入FAVOURITE_ARTICLE表
+                var item = new FavouriteArticle();
+                item.FavouriteId = F_id;
+                item.ArticleId = articleID;
+                item.FavouriteTime = DateTime.Now;
+                entity.FavouriteArticle.Add(item);
+                entity.SaveChanges();
+
+                //Response.StatusCode = 200;//成功
+                flag = 1;
+                return Json(new { ReturnFlag = flag, folderID = F_id, articleId = articleID });
             }
-            var collectNum = article.CollectNum;
-            if (collectNum == default)
-                article.CollectNum = 1;
-            else
-                article.CollectNum = collectNum+1;
-            entity.Entry(article).State = EntityState.Modified;
-            //entity.SaveChanges();
-
-            //加入FAVOURITE_ARTICLE表
-            var item = new FavouriteArticle();
-            item.FavouriteId = F_id;
-            item.ArticleId = articleID;
-            item.FavouriteTime = DateTime.Now;
-            entity.FavouriteArticle.Add(item);
-            entity.SaveChanges();
-
-            //Response.StatusCode = 200;//成功
-            flag = 1;
-            return Json(new { ReturnFlag = flag, folderID = F_id, articleId = articleID });
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+                
+            }
+            return Json(new { Flag = flag, errorMsg = msg });
+            
         }
 
         /// <summary>
@@ -545,10 +557,17 @@ namespace Temperature.Controllers
                 return Json(new { ReturnFlag = flag, FolderName = folderName, result = "NOT FOUND" });
             }
 
-            var item =
+            /*var item =
                 (from u in entity.FavouriteArticle
                  where u.FavouriteId == F_id
-                 select u ).Distinct();
+                 select u ).Distinct();*/
+
+            var item =
+                (from u in entity.FavouriteArticle
+                    join mid in entity.Article on u.ArticleId equals mid.ArticleId 
+                    join right in entity.User on mid.UserId equals right.UserId
+                 where u.FavouriteId == F_id
+                 select new { u.FavouriteId,u.ArticleId,u.FavouriteTime,right.UserId,right.NickName,mid.Title}).Distinct();
 
             //Response.StatusCode = 200;//成功
             flag = 1;

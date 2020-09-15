@@ -1935,5 +1935,25 @@
                     返回：{ Flag = returnFlag, errorMsg = msg }
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.ZoneController.getArticleRatio">
+            <summary>
+            获取各分区文章数量
+            </summary>
+            <returns></returns>
+            <remarks>
+                返回：
+                    { u.ZoneId, u.ZoneName, u.ZoneArticleNum }
+            </remarks>
+        </member>
+        <member name="M:Temperature.Controllers.ZoneController.getTopicRatio">
+            <summary>
+            获取各分区话题数量
+            </summary>
+            <returns></returns>
+            <remarks>
+                返回：
+                    { u.ZoneId, u.ZoneName, u.ZoneTopicNum }
+            </remarks>
+        </member>
     </members>
 </doc>

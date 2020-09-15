@@ -78,5 +78,40 @@ namespace Temperature.Controllers
 
                
         }
+
+        /// <summary>
+        /// 获取各分区文章数量
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///         { u.ZoneId, u.ZoneName, u.ZoneArticleNum }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getArticleRatio()
+        {
+            var result =
+                (from u in entity.Zone
+                 select new { id = u.ZoneId, name = u.ZoneName,value =  u.ZoneArticleNum }).Distinct();
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 获取各分区话题数量
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///         { u.ZoneId, u.ZoneName, u.ZoneTopicNum }
+        /// </remarks>
+        [HttpPost]
+        public JsonResult getTopicRatio()
+        {
+            var result =
+                (from u in entity.Zone
+                 select new { id = u.ZoneId, name = u.ZoneName, value = u.ZoneTopicNum }).Distinct();
+            return Json(result);
+        }
+
     }
 }
