@@ -414,7 +414,7 @@ namespace Temperature.Controllers {
         }
 
 
-        
+
 
         /// <summary>
         /// 获取所有相簿
@@ -436,40 +436,50 @@ namespace Temperature.Controllers {
         /// }
         /// </remarks>
         [HttpPost]
-        public ActionResult getAllAlbumByPage(string userID, int pageNum, int pageSize) {
+        public ActionResult getAllAlbumByPage(string userID, int pageNum, int pageSize)
+        {
             int getAllAlbumFlag = 0;
             IEnumerable<object> albums = null;
             List<string> firstPhoto = new List<string>();
 
-            try {
+            try
+            {
                 albums = (from e in entity.Album
                           where e.UserId == int.Parse(userID)
                           orderby e.AlbumTime descending
-                          select new {
-                              albumId = e.AlbumId,
-                              albumIntroduction = e.AlbumIntroduction,
-                              albumName = e.AlbumName,
-                              albumTime = e.AlbumTime,
-                              userId = e.UserId
-                          }).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
+                          select e).Skip((pageNum - 1) * pageSize).Take(pageSize); //最新的在前面
 
-                //foreach(var album in albums) {
-                //    var realAlbum = (AlbumWithPhoto)album;
-                    
-                //    var photo = (from f in entity.Photo
-                //                 where f.AlbumId == 1
-                //                 select f.PhotoAddress).FirstOrDefault();
-                //    firstPhoto.Add(photo.ToString());
-                //}
+                //{
+                //    albumId = e.AlbumId,
+                //              albumIntroduction = e.AlbumIntroduction,
+                //              albumName = e.AlbumName,
+                //              albumTime = e.AlbumTime,
+                //              userId = e.UserId
+                //          }
+
+                foreach (var album in albums.ToList())
+                {
+
+                    var realAlbum = (Album)album;
+                    int id = realAlbum.AlbumId;
+
+                    var photo = (from f in entity.Photo
+                                 where f.AlbumId == id
+                                 select f.PhotoAddress).FirstOrDefault();
+                    if (photo == null) firstPhoto.Add("#");
+                    else firstPhoto.Add(photo.ToString());
+                }
                 getAllAlbumFlag = 1;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 getAllAlbumFlag = 0;
             }
-            var returnJson = new {
+            var returnJson = new
+            {
                 albums = JsonConvert.SerializeObject(albums),
-                //firstPhoto = firstPhoto,
+                firstPhoto = firstPhoto,
                 getAllAlbumFlag = getAllAlbumFlag,
             };
 
