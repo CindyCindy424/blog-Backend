@@ -497,6 +497,7 @@ namespace Temperature.Controllers
                      Parent_cr_id = u.ParentCrId,
                      Parent_cr_name =y.NickName,
                      Parent_cr_avatr=y.Avatr,
+                     Parent_cr_content = x.ArticleCrContent,
                      /*
                       Parent_cr_name=(from c in entity.User
                                       where c.UserId==u.ParentCrId
