@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 //20200907 订正后的articlecontroller
 namespace Temperature.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("[controller]/[action]")]
     [ApiController]
     //[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
@@ -48,9 +48,15 @@ namespace Temperature.Controllers
         ///     3：该用户已存在同名文章
         /// </remarks>
         [HttpPost]
-        public JsonResult createArticleByNickName(string nick_name, string title, string content,int zoneid)
+        public JsonResult createArticleByNickName()//string nick_name, string title, string content,int zoneid)
         {
             var flag = 0;
+
+            string content = Request.Form["content"];
+            string title = Request.Form["title"];
+            string nick_name = Request.Form["nick_name"];
+            string zoneid = Request.Form["zoneid"];
+
             var userid =
                    (from c in entity.User
                     where c.NickName == nick_name
@@ -90,7 +96,7 @@ namespace Temperature.Controllers
             article.Title = title;
             article.UserId = id;
             article.ReadNum = 0;
-            article.ZoneId=zoneid;
+            article.ZoneId=int.Parse(zoneid);
             article.CollectNum = 0;
             article.ArticleLikes = 0;
             article.ArticleUploadTime = DateTime.Now;
