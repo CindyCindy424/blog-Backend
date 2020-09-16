@@ -565,7 +565,7 @@ namespace Temperature.Controllers
             var item =
                 (from u in entity.FavouriteArticle
                     join mid in entity.Article on u.ArticleId equals mid.ArticleId 
-                    join right in entity.User on mid.UserId equals right.UserId
+                    join right in entity.User on mid.UserId equals right.UserId  //文章作者信息
                  where u.FavouriteId == F_id
                  select new { u.FavouriteId,u.ArticleId,u.FavouriteTime,right.UserId,right.NickName,mid.Title}).Distinct();
 
@@ -670,13 +670,35 @@ namespace Temperature.Controllers
                 else
                 {
                     var result =
+                (from u in entity.FavouriteArticle
+                 join mid in entity.Article on u.ArticleId equals mid.ArticleId
+                 join right in entity.User on mid.UserId equals right.UserId  //文章作者信息
+                 where u.FavouriteId == folderID
+                 select new { u.FavouriteId, 
+                     u.ArticleId,
+                     u.FavouriteTime,
+                     mid.Title, 
+                     right.UserId, 
+                     right.NickName,
+                     mid.ArticleContent,
+                     mid.ArticleLikes,
+                     mid.CollectNum,
+                     mid.ReadNum,
+                     mid.ArticleUploadTime,
+                     mid.ZoneId,
+                       }).Distinct().OrderByDescending(right => right.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
+                    flag = 1;
+                    return Json(new { Flag = flag, Result = result });
+
+
+
+                   /* var result =
                 (from c in entity.FavouriteArticle
-                 join right in entity.Article
-                 on c.ArticleId equals right.ArticleId
+                 join right in entity.Article on c.ArticleId equals right.ArticleId
                  where c.FavouriteId == folderID
                  select right).Distinct().OrderByDescending(right => right.ArticleUploadTime).Skip((pageNum - 1) * pageSize).Take(pageSize);
                     flag = 1;
-                    return Json(new { Flag = flag, Result = result });
+                    return Json(new { Flag = flag, Result = result });*/
                 }
             }
             catch (Exception e)
