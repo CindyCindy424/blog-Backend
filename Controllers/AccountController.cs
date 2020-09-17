@@ -2281,6 +2281,99 @@ namespace Temperature.Controllers
         }
 
 
+        /// <summary>
+        /// 检查当前用户是否关注某用户【By name】
+        /// </summary>
+        /// <param name="nameOfCurrentUser">当前用户名</param>
+        /// <param name="nameOfCheckUser">需要验证的用户名</param>
+        /// <returns></returns>
+        /// <remarks>
+        ///     返回：
+        ///     
+        ///     flag：0 未操作
+        ///     
+        ///         返回：{ result = "error", errorMsg = msg }
+        ///         
+        ///     flag：1 且idOfCurrentUser关注了idOfCheckUser
+        ///     
+        ///         返回：{ result = "True" }
+        ///         
+        ///     flag：2 未关注
+        ///     
+        ///         返回：{ result = "False" }
+        ///         
+        ///     flag：3 用户名不存在
+        ///     
+        ///         返回：{Flag = flag, result = "User Not Found"}
+        ///     
+        /// </remarks>
+        [HttpPost]
+        public JsonResult checkFollowByName(string nameOfCurrentUser, string nameOfCheckUser)
+        {
+            int flag = 0;
+            UserFollow result = new UserFollow();
+            string msg = "";
+            try
+            {
+                var id1 =
+                    (from c in entity.User
+                     where c.NickName == nameOfCurrentUser  //当前用户
+                     select c.UserId).Distinct();
+                var idOfCurrentUser = id1.FirstOrDefault();
+                var user1 = entity.User.Find(idOfCurrentUser); //在数据库中根据key找到相应记录
+
+                var id2 =
+                    (from c in entity.User
+                     where c.NickName == nameOfCheckUser  //目标
+                     select c.UserId).Distinct();
+                var idOfCheckUser = id2.FirstOrDefault();
+                var user = entity.User.Find(idOfCheckUser); 
+
+
+                if (idOfCurrentUser == default || idOfCheckUser ==default)
+                {
+                    flag = 3; //没有找到该用户
+                    return Json(new { Flag = flag, result = "User Not Found" });
+                }
+                else
+                {
+                    result = entity.UserFollow.Find(idOfCurrentUser, idOfCheckUser);
+                    if (result == default)
+                    {
+                        flag = 2;//不存在该关系
+                    }
+                    else
+                    {
+                        flag = 1;
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                flag = 0;
+                msg = e.Message;
+            }
+            if (flag == 1)
+            {
+                return Json(new { result = "True" });
+            }
+            else if (flag == 2)
+            {
+                return Json(new { result = "False" });
+            }
+            else if(flag == 3)
+            {
+                return Json(new { result = "User Not Exist" });
+            }
+            else
+            {
+                return Json(new { result = "error", errorMsg = msg });
+            }
+
+
+        }
+
 
     }    
 

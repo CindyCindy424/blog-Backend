@@ -588,6 +588,34 @@
                 
             </remarks>
         </member>
+        <member name="M:Temperature.Controllers.AccountController.checkFollowByName(System.String,System.String)">
+            <summary>
+            检查当前用户是否关注某用户【By name】
+            </summary>
+            <param name="nameOfCurrentUser">当前用户名</param>
+            <param name="nameOfCheckUser">需要验证的用户名</param>
+            <returns></returns>
+            <remarks>
+                返回：
+                
+                flag：0 未操作
+                
+                    返回：{ result = "error", errorMsg = msg }
+                    
+                flag：1 且idOfCurrentUser关注了idOfCheckUser
+                
+                    返回：{ result = "True" }
+                    
+                flag：2 未关注
+                
+                    返回：{ result = "False" }
+                    
+                flag：3 用户名不存在
+                
+                    返回：{Flag = flag, result = "User Not Found"}
+                
+            </remarks>
+        </member>
         <member name="M:Temperature.Controllers.ArticleController.createArticleByNickName">
             <summary>
             创建文章
