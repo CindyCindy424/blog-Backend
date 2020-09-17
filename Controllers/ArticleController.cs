@@ -1666,9 +1666,24 @@ namespace Temperature.Controllers
             try
             {
                 var content = (from c in entity.Article
+                               join right in entity.User on c.UserId equals right.UserId
                                where c.UserId==userid
                                orderby (c.ReadNum + c.ArticleLikes) descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
-                               select c).Take(getarticleNum);
+                               select new
+                               {
+                                   nickname = right.NickName,
+                                   article_id = c.ArticleId,
+                                   title = c.Title,
+                                   userid = c.UserId,
+                                   articlcontent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   uploadtime = c.ArticleUploadTime,
+                                   zoneid = c.ZoneId,
+
+                               } 
+                               ).Take(getarticleNum);
 
                // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                // returnJson["Result"] = contentJson;
@@ -1710,9 +1725,23 @@ namespace Temperature.Controllers
             try
             {
                 var content = (from c in entity.Article
+                               join right in entity.User on c.UserId equals right.UserId
                                where c.UserId == userid
-                               orderby c.ArticleUploadTime descending  //按照文章（浏览量+点赞量）从大到小的顺序进行排序  
-                               select c).Take(getarticleNum);
+                                orderby c.ArticleUploadTime descending    
+                               select new
+                               {
+                                   nickname = right.NickName,
+                                   article_id = c.ArticleId,
+                                   title = c.Title,
+                                   userid = c.UserId,
+                                   articlcontent = c.ArticleContent,
+                                   articlelike = c.ArticleLikes,
+                                   collectnum = c.CollectNum,
+                                   readnum = c.ReadNum,
+                                   uploadtime = c.ArticleUploadTime,
+                                   zoneid = c.ZoneId,
+
+                               }).Take(getarticleNum);
 
                 // string contentJson = JsonConvert.SerializeObject(content); //序列化对象
                 // returnJson["Result"] = contentJson;
@@ -1814,11 +1843,14 @@ namespace Temperature.Controllers
 
             try
             {
-                var content = (from c in entity.Article
+               
+                               var content = (from c in entity.Article
                                join d in entity.Zone on c.ZoneId equals d.ZoneId
+                               join right in entity.User on c.UserId equals right.UserId
                                where c.Title.Contains(searchContent)
                                select new
                                {
+                                   nickname=right.NickName,
                                    ArticleTitle = c.Title,
                                    articleid = c.ArticleId,
                                    articleContent = c.ArticleContent,
