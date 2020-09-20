@@ -273,6 +273,8 @@ namespace Temperature.Controllers
                 user.Email = email;
                 user.Tel = tel;
                 user.Wechat = wechat;
+                user.ArticleNum = 0;
+                user.FollowNum = 0;
                 user.Avatr = "BlogPics\\Avator\\defaultAvator.png";
                 entity.User.Add(user); //把user这个实体加入数据库
                 entity.SaveChanges();
@@ -1550,7 +1552,7 @@ namespace Temperature.Controllers
                             join right in entity.User
                             on u.ActiveUserId equals right.UserId
                  where u.PassiveUserId == id
-                 select new { Name = right.NickName,Avator  = right.Avatr}).Distinct();
+                 select new { Name = right.NickName,Avator  = right.Avatr, userID = right.UserId }).Distinct();
             if(fansID.FirstOrDefault() == default)
             {
                 flag = 3;//该用户没有粉丝
@@ -1686,7 +1688,7 @@ namespace Temperature.Controllers
                             join right in entity.User
                             on u.PassiveUserId equals right.UserId
                  where u.ActiveUserId == id
-                 select new { Name = right.NickName,Avator = right.Avatr}).Distinct();
+                 select new { Name = right.NickName,Avator = right.Avatr, userID =  right.UserId}).Distinct();
             if (followID.FirstOrDefault() == default)
             {
                 flag = 3;//该用户关注的博主为空

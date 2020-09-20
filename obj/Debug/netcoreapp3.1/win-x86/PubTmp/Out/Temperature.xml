@@ -1120,6 +1120,13 @@
             <param name="userid"></param>
             <returns></returns>
         </member>
+        <member name="M:Temperature.Controllers.ArticleController.getMostPopularArticle(System.String)">
+            <summary>
+            获取zoneId下点赞数最多的4篇文章
+            </summary>
+            <param name="zoneID"></param>
+            <returns></returns>
+        </member>
         <member name="M:Temperature.Controllers.FavouriteController.createFolderByNickName(System.String,System.String)">
              <summary>
              新建收藏夹(禁止同一用户创建同名收藏夹）

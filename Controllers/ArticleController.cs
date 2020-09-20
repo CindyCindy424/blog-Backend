@@ -1919,8 +1919,49 @@ namespace Temperature.Controllers
             }
         }
 
+        /// <summary>
+        /// 获取zoneId下点赞数最多的4篇文章
+        /// </summary>
+        /// <param name="zoneID"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getMostPopularArticle(string zoneID)
+        {
+            int flag = 0;
+            object content = new object();
 
-        
+            try
+            {
+                content = (from c in entity.Article
+                           join d in entity.User on c.UserId equals d.UserId
+                           where c.ZoneId == int.Parse(zoneID)
+                           select new
+                           {
+                               articleId = c.ArticleId,
+                               userId = c.UserId,
+                               articleContent = c.ArticleContent,
+                               articleLikes = c.ArticleLikes,
+                               collectNum = c.CollectNum,
+                               readNum = c.ReadNum,
+                               articleUploadTime = c.ArticleUploadTime,
+                               zoneId = c.ZoneId,
+                               avatr = d.Avatr
+                           }).OrderByDescending(c => c.articleLikes).Take(4);
+                flag = 1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                flag = 0;
+            }
+
+            return Json(new { articles = content, flag = flag });
+        }
+
+
+
+
+
     }
 
 }
